@@ -12,6 +12,12 @@ from backend.app.config import IMG_SIZE, NUM_CLASSES
 logger = logging.getLogger(__name__)
 
 
+def _tensorboard_installed() -> bool:
+    """Check if tensorboard package is available (required for TB callback at runtime)."""
+    import importlib.util
+    return importlib.util.find_spec("tensorboard") is not None
+
+
 def build_model(
     num_classes: int = NUM_CLASSES,
     trainable_base: bool = False,
@@ -86,10 +92,10 @@ def get_callbacks(
         ),
     ]
 
-    if log_dir:
-        try:
-            callbacks.append(tf.keras.callbacks.TensorBoard(log_dir=log_dir))
-        except Exception as exc:
-            logger.warning("TensorBoard disabled (%s). Training continues without it.", exc)
+    if log_dir and _tensorboard_installed():
+        callbacks.append(tf.keras.callbacks.TensorBoard(log_dir=log_dir))
+        logger.info("TensorBoard logging enabled at %s", log_dir)
+    elif log_dir:
+        logger.info("TensorBoard not installed — skipping (optional: pip install tensorboard)")
 
     return callbacks

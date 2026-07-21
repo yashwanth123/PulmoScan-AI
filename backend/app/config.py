@@ -45,38 +45,45 @@ SCAN_TYPES = {
     },
 }
 
-# Public sample images — expected_label used to verify predictions in the UI
+# Public sample images — run: python3 scripts/setup_samples.py
 SAMPLE_IMAGES = {
     "chest_xray": [
         {
             "id": "xray_normal",
             "name": "Normal Chest X-Ray",
-            "label_hint": "Known label: Normal",
+            "label_hint": "Expected: Normal",
             "expected_label": "Normal",
-            "url": "https://upload.wikimedia.org/wikipedia/commons/8/8f/Chest_Xray_PA_3-8-2010.png",
+            "url": "local",
+        },
+        {
+            "id": "xray_covid",
+            "name": "COVID-19 X-Ray",
+            "label_hint": "Expected: COVID-19",
+            "expected_label": "COVID-19",
+            "url": "local",
         },
         {
             "id": "xray_pneumonia",
-            "name": "Pneumonia X-Ray",
-            "label_hint": "Known label: Pneumonia",
-            "expected_label": "Pneumonia",
-            "url": "https://upload.wikimedia.org/wikipedia/commons/c/c8/Pneumonia_X-ray.jpg",
+            "name": "Abnormal X-Ray (COVID sample)",
+            "label_hint": "Expected: COVID-19",
+            "expected_label": "COVID-19",
+            "url": "local",
         },
     ],
     "ct_scan": [
         {
             "id": "ct_chest",
-            "name": "Normal Chest CT",
-            "label_hint": "Known label: Normal",
+            "name": "Chest Scan Sample",
+            "label_hint": "Expected: Normal",
             "expected_label": "Normal",
-            "url": "https://upload.wikimedia.org/wikipedia/commons/4/4e/CT_of_a_normal_Thorax%2C_axial_plane_%2830%29.jpg",
+            "url": "local",
         },
         {
             "id": "ct_lung",
-            "name": "Thorax CT Slice",
-            "label_hint": "Known label: Normal",
+            "name": "Lung Scan Sample",
+            "label_hint": "Expected: Normal",
             "expected_label": "Normal",
-            "url": "https://upload.wikimedia.org/wikipedia/commons/6/6e/CT_scan_of_the_Thorax_%28axial%29_%281%29.jpg",
+            "url": "local",
         },
     ],
 }
@@ -92,4 +99,5 @@ TRAIN_CONFIG = {
     "fine_tune_epochs": 10,
     "fine_tune_lr": 1e-5,
     "validation_split": 0.2,
+    "minority_boost": 2.5,
 }

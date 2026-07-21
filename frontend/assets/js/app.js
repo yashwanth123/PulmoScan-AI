@@ -328,7 +328,7 @@
     const formData = new FormData();
     formData.append('file', selectedFile);
     formData.append('scan_type', selectedScanType);
-    formData.append('include_gradcam', $('#gradcam-toggle')?.checked ?? true);
+    formData.append('include_gradcam', ($('#gradcam-toggle')?.checked ?? true) ? 'true' : 'false');
 
     try {
       const res = await fetch(`${API}/api/predict`, { method: 'POST', body: formData });
@@ -405,7 +405,7 @@
     $('#recommendation-text').textContent = data.recommendation;
 
     const gradcamSection = $('#gradcam-section');
-    if (data.gradcam_image) {
+    if (data.gradcam_enabled && data.gradcam_image) {
       const img = $('#gradcam-image');
       if (img) img.src = data.gradcam_image;
       gradcamSection?.classList.remove('hidden');

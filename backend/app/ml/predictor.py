@@ -37,6 +37,7 @@ class PredictionResult:
     model_loaded: bool = True
     demo_mode: bool = False
     tta_enabled: bool = True
+    gradcam_enabled: bool = False
     reliability: str = "demo"
     reliability_message: str = ""
     timestamp: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
@@ -50,6 +51,7 @@ class PredictionResult:
             "risk_level": self.risk_level,
             "recommendation": self.recommendation,
             "gradcam_image": self.gradcam_image,
+            "gradcam_enabled": self.gradcam_enabled,
             "model_loaded": self.model_loaded,
             "demo_mode": self.demo_mode,
             "tta_enabled": self.tta_enabled,
@@ -131,13 +133,25 @@ def _risk_and_recommendation(
     return risk, rec
 
 
-def _resolve_class_names(num_outputs: int) -> list[str]:
-    """Map model output dimension to human-readable labels."""
+def _load_display_labels(num_outputs: int) -> list[str]:
+    """Load saved training labels or fall back to defaults."""
+    label_file = MODEL_PATH.parent / "class_labels.json"
+    if label_file.exists():
+        import json
+        data = json.loads(label_file.read_text())
+        labels = data.get("display_labels", [])
+        if len(labels) == num_outputs:
+            return labels
     if num_outputs == len(BINARY_CLASS_NAMES):
         return list(BINARY_CLASS_NAMES)
     if num_outputs == len(CLASS_NAMES):
         return list(CLASS_NAMES)
     return [f"Class_{i}" for i in range(num_outputs)]
+
+
+def _resolve_class_names(num_outputs: int) -> list[str]:
+    """Map model output dimension to human-readable labels."""
+    return _load_display_labels(num_outputs)
 
 
 def load_model(force: bool = False) -> tf.keras.Model:
@@ -149,7 +163,7 @@ def load_model(force: bool = False) -> tf.keras.Model:
 
         if MODEL_PATH.exists():
             logger.info("Loading trained model from %s", MODEL_PATH)
-            _model = tf.keras.models.load_model(str(MODEL_PATH))
+            _model = tf.keras.models.load_model(str(MODEL_PATH), compile=False)
         else:
             logger.warning(
                 "No trained weights at %s — binary demo model (COVID-19 vs Normal). "
@@ -227,6 +241,7 @@ def predict(
         risk_level=risk,
         recommendation=rec,
         gradcam_image=gradcam_b64,
+        gradcam_enabled=include_gradcam and gradcam_b64 is not None,
         model_loaded=MODEL_PATH.exists(),
         demo_mode=demo_mode,
         tta_enabled=True,

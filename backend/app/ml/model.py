@@ -46,16 +46,23 @@ def build_model(
     return model
 
 
-def compile_model(model: tf.keras.Model, learning_rate: float = 1e-4) -> tf.keras.Model:
-    """Compile model with standard classification metrics."""
+def compile_model(
+    model: tf.keras.Model,
+    learning_rate: float = 1e-4,
+    use_focal_loss: bool = True,
+) -> tf.keras.Model:
+    """Compile model with focal loss for imbalanced COVID vs Normal data."""
+    from backend.app.ml.losses import focal_loss
+
+    loss = focal_loss(gamma=2.0, alpha=0.75) if use_focal_loss else "categorical_crossentropy"
     model.compile(
         optimizer=tf.keras.optimizers.Adam(learning_rate=learning_rate),
-        loss="categorical_crossentropy",
+        loss=loss,
         metrics=[
             "accuracy",
+            tf.keras.metrics.AUC(name="auc"),
             tf.keras.metrics.Precision(name="precision"),
             tf.keras.metrics.Recall(name="recall"),
-            tf.keras.metrics.AUC(name="auc"),
         ],
     )
     return model

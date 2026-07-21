@@ -45,15 +45,23 @@ def idx_to_label(index: int, class_indices: dict[str, int]) -> str:
     return mapping.get(index, str(index))
 
 
-def compute_class_weights(generator) -> dict[int, float]:
-    """Compute inverse-frequency class weights for imbalanced data."""
+def compute_class_weights(generator, boost_minority: float = 2.5) -> dict[int, float]:
+    """
+    Inverse-frequency weights with extra boost for the minority (COVID) class.
+
+    Without boost, the model often predicts all NORMAL (~65% accuracy but 0% COVID recall).
+    """
     counts = np.bincount(generator.classes, minlength=generator.num_classes)
     total = counts.sum()
-    return {
+    weights = {
         index: total / (len(counts) * count)
         for index, count in enumerate(counts)
         if count > 0
     }
+    if len(counts) >= 2:
+        minority_idx = int(np.argmin(counts))
+        weights[minority_idx] = weights.get(minority_idx, 1.0) * boost_minority
+    return weights
 
 
 def build_generators(
@@ -119,11 +127,5 @@ def build_generators(
         shuffle=False,
         **common,
     )
-
-    if quick:
-        # Cap steps per epoch for faster smoke runs (val must stay > 0)
-        train_flow.samples = min(train_flow.samples, 400)
-        if val_flow.samples > 0:
-            val_flow.samples = min(val_flow.samples, 100)
 
     return train_flow, val_flow, test_flow

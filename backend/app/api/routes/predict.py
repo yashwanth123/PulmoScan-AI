@@ -20,9 +20,10 @@ MAX_FILE_SIZE = 20 * 1024 * 1024  # 20 MB
 async def predict_scan(
     file: UploadFile = File(...),
     scan_type: str = Form(default="chest_xray"),
-    include_gradcam: bool = Form(default=True),
+    include_gradcam: str = Form(default="true"),
 ):
     """Analyze uploaded lung scan and return diagnosis with explainability."""
+    gradcam_on = str(include_gradcam).lower() in ("true", "1", "yes", "on")
     if not file.filename:
         raise HTTPException(status_code=400, detail="No file provided")
 
@@ -44,7 +45,7 @@ async def predict_scan(
     save_path.write_bytes(contents)
 
     try:
-        result = predict(contents, scan_type=scan_type, include_gradcam=include_gradcam)
+        result = predict(contents, scan_type=scan_type, include_gradcam=gradcam_on)
         return PredictionResponse(**result.to_dict())
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Prediction failed: {exc}") from exc

@@ -16,6 +16,14 @@
 
 > ⚠️ **Disclaimer:** Research and screening tool only. Not FDA/CE approved. Always consult qualified medical professionals.
 
+**Repository:** [github.com/yashwanth123/PulmoScan-AI](https://github.com/yashwanth123/PulmoScan-AI)
+
+```bash
+git clone https://github.com/yashwanth123/PulmoScan-AI.git
+cd PulmoScan-AI
+git checkout cursor/pulmoscan-ai-platform-1c3d   # latest platform branch
+```
+
 ---
 
 ## Project Structure

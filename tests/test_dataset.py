@@ -18,7 +18,7 @@ def test_compute_class_weights_balanced() -> None:
         classes = np.array([0, 0, 1, 1])
         num_classes = 2
 
-    weights = compute_class_weights(FakeGenerator())
+    weights = compute_class_weights(FakeGenerator(), boost_minority=1.0)
     assert weights[0] == weights[1] == 1.0
 
 

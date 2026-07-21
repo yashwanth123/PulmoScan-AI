@@ -16,6 +16,14 @@
 
 > ⚠️ **Disclaimer:** Research and screening tool only. Not FDA/CE approved. Always consult qualified medical professionals.
 
+**Repository:** [github.com/yashwanth123/PulmoScan-AI](https://github.com/yashwanth123/PulmoScan-AI)
+
+```bash
+git clone https://github.com/yashwanth123/PulmoScan-AI.git
+cd PulmoScan-AI
+git checkout cursor/pulmoscan-ai-platform-1c3d   # latest platform branch
+```
+
 ---
 
 ## Project Structure
@@ -49,9 +57,19 @@ pulmoscan-ai/
 
 ## Quick Start
 
+### Requirements
+
+- **Python 3.10, 3.11, or 3.12** (recommended)
+- Python 3.13 works with TensorFlow 2.20+
+- macOS: use `python3` and `pip3` (or a virtual environment)
+
 ### 1. Install
 
 ```bash
+python3 -m venv venv
+source venv/bin/activate          # Windows: venv\Scripts\activate
+
+pip install --upgrade pip
 pip install -r requirements.txt
 pip install -r requirements-dev.txt   # optional, for tests
 ```

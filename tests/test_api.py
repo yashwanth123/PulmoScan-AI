@@ -58,6 +58,24 @@ def test_frontend_index(client) -> None:
     assert "PulmoScan" in response.text
 
 
+def test_samples_list(client) -> None:
+    response = client.get("/api/samples")
+    assert response.status_code == 200
+    data = response.json()
+    assert "chest_xray" in data["samples"]
+    assert "ct_scan" in data["samples"]
+    assert data["samples"]["chest_xray"][0].get("expected_label")
+
+
+def test_model_metrics(client) -> None:
+    response = client.get("/api/model/metrics")
+    assert response.status_code == 200
+    data = response.json()
+    assert "model_trained" in data
+    assert "reliability_guide" in data
+    assert isinstance(data["reliability_guide"], list)
+
+
 def test_predict_rejects_empty_file(client) -> None:
     response = client.post(
         "/api/predict",
@@ -87,6 +105,8 @@ def test_predict_with_image(client, sample_xray_bytes: bytes) -> None:
     data = response.json()
     assert "diagnosis" in data
     assert "confidence" in data
+    assert "reliability" in data
+    assert "reliability_message" in data
     assert "probabilities" in data
     assert "risk_level" in data
 

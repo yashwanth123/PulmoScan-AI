@@ -1,18 +1,20 @@
-# PulmoScan AI — Lung Imaging Intelligence Platform
-# Python 3.10+
+# PulmoScan AI — Python 3.10–3.13 (3.11 recommended)
 
 # Web framework
-fastapi==0.115.6
-uvicorn[standard]==0.34.0
-python-multipart==0.0.20
-pydantic==2.10.4
+fastapi>=0.115.0,<0.116.0
+uvicorn[standard]>=0.34.0,<0.35.0
+python-multipart>=0.0.20
+pydantic>=2.10.0,<3.0.0
 
-# Deep learning
-tensorflow==2.18.0
-numpy==1.26.4
-Pillow==11.1.0
-opencv-python-headless==4.10.0.84
-scikit-learn==1.6.0
+# Deep learning (2.18+; use 2.20+ on Python 3.13 / Apple Silicon)
+tensorflow>=2.18.0,<2.22.0
+numpy>=1.26.0,<3.0.0
+Pillow>=11.0.0
+opencv-python-headless>=4.10.0
+scikit-learn>=1.6.0
 
 # Utilities
-httpx==0.28.1
+httpx>=0.28.0
+
+# Optional — training logs (install if you want TensorBoard)
+# tensorboard>=2.18.0

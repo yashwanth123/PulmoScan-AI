@@ -1,11 +1,21 @@
 """Transfer-learning model builder for lung scan classification."""
 from __future__ import annotations
 
+import logging
+
 import tensorflow as tf
 from tensorflow.keras import layers, models
 from tensorflow.keras.applications import EfficientNetB0
 
 from backend.app.config import IMG_SIZE, NUM_CLASSES
+
+logger = logging.getLogger(__name__)
+
+
+def _tensorboard_installed() -> bool:
+    """Check if tensorboard package is available (required for TB callback at runtime)."""
+    import importlib.util
+    return importlib.util.find_spec("tensorboard") is not None
 
 
 def build_model(
@@ -36,42 +46,63 @@ def build_model(
     return model
 
 
-def compile_model(model: tf.keras.Model, learning_rate: float = 1e-4) -> tf.keras.Model:
-    """Compile model with standard classification metrics."""
+def compile_model(
+    model: tf.keras.Model,
+    learning_rate: float = 1e-4,
+    use_focal_loss: bool = True,
+) -> tf.keras.Model:
+    """Compile model with focal loss for imbalanced COVID vs Normal data."""
+    from backend.app.ml.losses import focal_loss
+
+    loss = focal_loss(gamma=2.0, alpha=0.75) if use_focal_loss else "categorical_crossentropy"
     model.compile(
         optimizer=tf.keras.optimizers.Adam(learning_rate=learning_rate),
-        loss="categorical_crossentropy",
+        loss=loss,
         metrics=[
             "accuracy",
+            tf.keras.metrics.AUC(name="auc"),
             tf.keras.metrics.Precision(name="precision"),
             tf.keras.metrics.Recall(name="recall"),
-            tf.keras.metrics.AUC(name="auc"),
         ],
     )
     return model
 
 
-def get_callbacks(checkpoint_path: str, log_dir: str) -> list:
-    """Training callbacks for checkpointing and early stopping."""
-    return [
+def get_callbacks(
+    checkpoint_path: str,
+    log_dir: str | None = None,
+    use_validation: bool = True,
+) -> list:
+    """Training callbacks. TensorBoard is optional if package is not installed."""
+    monitor_metric = "val_accuracy" if use_validation else "accuracy"
+    monitor_loss = "val_loss" if use_validation else "loss"
+
+    callbacks: list = [
         tf.keras.callbacks.ModelCheckpoint(
             checkpoint_path,
-            monitor="val_accuracy",
+            monitor=monitor_metric,
             save_best_only=True,
             verbose=1,
         ),
         tf.keras.callbacks.EarlyStopping(
-            monitor="val_loss",
+            monitor=monitor_loss,
             patience=5,
             restore_best_weights=True,
             verbose=1,
         ),
         tf.keras.callbacks.ReduceLROnPlateau(
-            monitor="val_loss",
+            monitor=monitor_loss,
             factor=0.5,
             patience=3,
             min_lr=1e-7,
             verbose=1,
         ),
-        tf.keras.callbacks.TensorBoard(log_dir=log_dir),
     ]
+
+    if log_dir and _tensorboard_installed():
+        callbacks.append(tf.keras.callbacks.TensorBoard(log_dir=log_dir))
+        logger.info("TensorBoard logging enabled at %s", log_dir)
+    elif log_dir:
+        logger.info("TensorBoard not installed — skipping (optional: pip install tensorboard)")
+
+    return callbacks

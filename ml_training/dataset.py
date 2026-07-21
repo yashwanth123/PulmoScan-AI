@@ -45,15 +45,23 @@ def idx_to_label(index: int, class_indices: dict[str, int]) -> str:
     return mapping.get(index, str(index))
 
 
-def compute_class_weights(generator) -> dict[int, float]:
-    """Compute inverse-frequency class weights for imbalanced data."""
+def compute_class_weights(generator, boost_minority: float = 2.5) -> dict[int, float]:
+    """
+    Inverse-frequency weights with extra boost for the minority (COVID) class.
+
+    Without boost, the model often predicts all NORMAL (~65% accuracy but 0% COVID recall).
+    """
     counts = np.bincount(generator.classes, minlength=generator.num_classes)
     total = counts.sum()
-    return {
+    weights = {
         index: total / (len(counts) * count)
         for index, count in enumerate(counts)
         if count > 0
     }
+    if len(counts) >= 2:
+        minority_idx = int(np.argmin(counts))
+        weights[minority_idx] = weights.get(minority_idx, 1.0) * boost_minority
+    return weights
 
 
 def build_generators(
@@ -88,7 +96,12 @@ def build_generators(
         brightness_range=(0.8, 1.2),
         fill_mode="nearest",
     )
-    eval_datagen = ImageDataGenerator(rescale=1.0 / 255)
+    # Same validation_split required — without it Keras returns 0 validation images
+    val_datagen = ImageDataGenerator(
+        rescale=1.0 / 255,
+        validation_split=validation_split,
+    )
+    test_datagen = ImageDataGenerator(rescale=1.0 / 255)
 
     common = dict(
         target_size=img_size,
@@ -103,20 +116,16 @@ def build_generators(
         shuffle=True,
         **common,
     )
-    val_flow = eval_datagen.flow_from_directory(
+    val_flow = val_datagen.flow_from_directory(
         str(train_dir),
         subset="validation",
         shuffle=False,
         **common,
     )
-    test_flow = eval_datagen.flow_from_directory(
+    test_flow = test_datagen.flow_from_directory(
         str(test_dir),
         shuffle=False,
         **common,
     )
-
-    if quick:
-        train_flow.samples = min(train_flow.samples, 400)
-        val_flow.samples = min(val_flow.samples, 100)
 
     return train_flow, val_flow, test_flow

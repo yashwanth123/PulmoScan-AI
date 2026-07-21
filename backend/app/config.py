@@ -26,20 +26,70 @@ SCAN_TYPES = {
         "icon": "xray",
         "description": "PA/AP chest radiograph analysis",
         "supported": True,
+        "color": "#00e5ff",
     },
     "ct_scan": {
         "name": "CT Scan",
         "icon": "ct",
-        "description": "Chest CT slice analysis (experimental)",
+        "description": "Axial chest CT slice analysis",
         "supported": True,
+        "color": "#a855f7",
     },
     "mri": {
         "name": "Chest MRI",
         "icon": "mri",
-        "description": "MRI lung imaging (coming soon)",
+        "description": "Not available yet — upload not supported",
         "supported": False,
+        "color": "#64748b",
+        "status_note": "Planned for a future release. Use Chest X-Ray or CT Scan.",
     },
 }
+
+# Public sample images — run: python3 scripts/setup_samples.py
+SAMPLE_IMAGES = {
+    "chest_xray": [
+        {
+            "id": "xray_normal",
+            "name": "Normal Chest X-Ray",
+            "label_hint": "Expected: Normal",
+            "expected_label": "Normal",
+            "url": "local",
+        },
+        {
+            "id": "xray_covid",
+            "name": "COVID-19 X-Ray",
+            "label_hint": "Expected: COVID-19",
+            "expected_label": "COVID-19",
+            "url": "local",
+        },
+        {
+            "id": "xray_pneumonia",
+            "name": "Abnormal X-Ray (COVID sample)",
+            "label_hint": "Expected: COVID-19",
+            "expected_label": "COVID-19",
+            "url": "local",
+        },
+    ],
+    "ct_scan": [
+        {
+            "id": "ct_chest",
+            "name": "Chest Scan Sample",
+            "label_hint": "Expected: Normal",
+            "expected_label": "Normal",
+            "url": "local",
+        },
+        {
+            "id": "ct_lung",
+            "name": "Lung Scan Sample",
+            "label_hint": "Expected: Normal",
+            "expected_label": "Normal",
+            "url": "local",
+        },
+    ],
+}
+
+# Default binary classes when model is not yet fine-tuned
+BINARY_CLASS_NAMES = ["COVID-19", "Normal"]
 
 # Training defaults
 TRAIN_CONFIG = {
@@ -49,4 +99,5 @@ TRAIN_CONFIG = {
     "fine_tune_epochs": 10,
     "fine_tune_lr": 1e-5,
     "validation_split": 0.2,
+    "minority_boost": 2.5,
 }

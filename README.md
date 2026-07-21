@@ -49,9 +49,19 @@ pulmoscan-ai/
 
 ## Quick Start
 
+### Requirements
+
+- **Python 3.10, 3.11, or 3.12** (recommended)
+- Python 3.13 works with TensorFlow 2.20+
+- macOS: use `python3` and `pip3` (or a virtual environment)
+
 ### 1. Install
 
 ```bash
+python3 -m venv venv
+source venv/bin/activate          # Windows: venv\Scripts\activate
+
+pip install --upgrade pip
 pip install -r requirements.txt
 pip install -r requirements-dev.txt   # optional, for tests
 ```

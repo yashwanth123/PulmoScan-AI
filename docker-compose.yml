@@ -1,0 +1,14 @@
+version: "3.8"
+
+services:
+  pulmoscan:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./models:/app/models
+      - ./uploads:/app/uploads
+      - ./data:/app/data
+    environment:
+      - TF_CPP_MIN_LOG_LEVEL=2
+    restart: unless-stopped

@@ -1,126 +1,166 @@
-# COVID-19 Detection Using Lung X-rays
+# PulmoScan AI — Lung Imaging Intelligence Platform
 
-This project explores the use of deep learning and transfer learning to classify chest X-ray images into **COVID-19**, **Pneumonia**, and **Normal** categories. It was developed as part of a final year B.Tech project at GITAM University.
+<p align="center">
+  <strong>AI-powered chest X-ray & lung scan analysis with explainable deep learning</strong>
+</p>
 
----
-
-## 🧠 Objective
-
-To build an AI-based system for early and cost-effective detection of COVID-19 infections using lung X-ray images, especially in areas lacking access to RT-PCR or CT scan facilities.
-
----
-
-## 📊 Dataset
-
-We used publicly available datasets from:
-- [Kaggle - Chest X-ray Pneumonia Dataset](https://www.kaggle.com/paultimothymooney/chest-xray-pneumonia)
-- [GitHub - education454 COVID-19 Dataset](https://github.com/education454/datasets)
-- [Qatar University - COVID-19 X-ray Images](#)
-
-**Total images:** 6568  
-- COVID-19: 712  
-- Pneumonia: 4273  
-- Normal: 1583  
+<p align="center">
+  EfficientNetB0 · Multi-class detection · Grad-CAM · Clinical-grade UI · Docker-ready
+</p>
 
 ---
 
-## 🏗️ Project Architecture
+## Overview
 
-The project has two phases:
-1. **Image Preprocessing:** resizing, grayscale conversion, rescaling, augmentation (optional)
-2. **Model Training & Evaluation:** using both custom CNN and pretrained models
+**PulmoScan AI** is a full-stack medical imaging platform evolved from a GITAM University B.Tech research project. It analyzes chest X-rays and related lung scans to detect **COVID-19**, **Pneumonia**, **Normal**, and **Tuberculosis** patterns using state-of-the-art transfer learning.
 
-### Classification Scenarios:
-- **Binary:** COVID-19 vs Normal
-- **Categorical:** COVID-19 vs Pneumonia vs Normal
+> ⚠️ **Disclaimer:** Research and screening tool only. Not FDA/CE approved. Always consult qualified medical professionals.
 
 ---
 
-## 🔍 Models Used
+## Features
 
-### Custom CNNs:
-- 5 CNNs with varying convolutional layers and filter sizes
-
-### Transfer Learning Models:
-- VGG16
-- DenseNet121 & DenseNet201
-- ResNet50
-- InceptionV3
-- InceptionResNetV2
-
-All models were evaluated using:
-- Accuracy
-- Precision
-- Recall
-- F1-Score
-- AUC (ROC)
+| Feature | Description |
+|---------|-------------|
+| 🧠 **EfficientNetB0** | ImageNet-pretrained backbone, fine-tuned for lung imaging |
+| 🎯 **Multi-class detection** | COVID-19, Normal, Pneumonia, Tuberculosis |
+| 🔥 **Grad-CAM** | Visual explainability heatmaps on predictions |
+| 🩻 **Multi-modality UI** | Chest X-Ray, CT Scan (MRI coming soon) |
+| 📊 **Dashboard** | Real-time stats, detection breakdown, history |
+| 🐳 **Docker** | One-command deployment |
+| 📱 **Responsive UI** | Clinical dark-theme interface for desktop & mobile |
 
 ---
 
-## 🧪 Key Results
+## Architecture
 
-### Binary Classification (Best):
-| Model | Accuracy | F1-Score | AUC |
-|-------|----------|----------|-----|
-| **InceptionResNetV2** | 99.59% | 0.996 | 99.2 |
-
-### Categorical Classification (Best):
-| Model | Accuracy | F1-Score | AUC |
-|-------|----------|----------|-----|
-| **DenseNet121** | 79.0% | 0.82 | 92.0 |
-
-### Larger Dataset (Handcrafted):
-| Model | Accuracy (Test) | F1-Score | AUC |
-|-------|------------------|----------|-----|
-| **DenseNet201** | 83.6% | 0.81 | 95.6 |
-
----
-
-## 🧑‍💻 Tech Stack
-
-- **Language:** Python  
-- **Libraries:** TensorFlow, Keras, OpenCV, Sklearn, NumPy, Matplotlib  
-- **Web Framework:** Flask (for frontend and prediction interface)  
-- **Frontend:** Responsive UI for mobile and tablet (with COVID stats, helper info, X-ray upload)
+```
+pulmoscan-ai/
+├── backend/app/          # FastAPI server
+│   ├── main.py           # Application entry
+│   ├── config.py         # Settings & class labels
+│   ├── api/routes/       # REST endpoints
+│   └── ml/               # Model, predictor, Grad-CAM
+├── frontend/             # Modern web UI
+│   ├── index.html
+│   └── assets/css,js/
+├── ml_training/          # Training pipeline
+│   └── train.py
+├── models/               # Saved model weights
+├── uploads/              # Uploaded scans (audit)
+├── data/                 # Dataset cache
+├── run.py                # Start server
+├── Dockerfile
+└── docker-compose.yml
+```
 
 ---
 
-## 🧩 Features
+## Quick Start
 
-- Responsive web UI to upload and predict from X-ray
-- Backend with Flask API for inference
-- Transfer learning with ImageNet weights
-- Model evaluation using metrics and confusion matrices
+### 1. Install dependencies
 
----
+```bash
+pip install -r requirements.txt
+```
 
-## 🔬 Limitations
+### 2. Train the model (recommended)
 
-- Overfitting observed due to small dataset
-- Bias in multiclass due to pneumonia-heavy data
-- Need for more COVID-positive X-ray data
+Downloads the COVID-19 X-ray dataset (~1.3 GB) and fine-tunes EfficientNetB0:
 
----
+```bash
+# Full training (~30 min on GPU)
+python ml_training/train.py
 
-## 🚀 Future Work
+# Quick demo training (~5 min)
+python ml_training/train.py --quick --epochs 5
+```
 
-- Improve classification with Ensemble Learning
-- Fine-tune weights and freeze layers better
-- Use high-resolution consistent PA X-ray images only
-- Implement model explainability (e.g., Grad-CAM)
-- Deploy as a web service or mobile app
+### 3. Launch the platform
 
----
+```bash
+python run.py
+```
 
-## 👨‍🎓 Authors
+Open **http://localhost:8000** in your browser.
 
-- L. Naga Sai Sri Ravi Teja  
-- S. Ritesh Dev  
-- K. Bharath  
-- **T. Yashwanth Sai**
+### Docker
 
-Under the guidance of **Dr. Don S. Kumar**  
-Dept. of Computer Science, GITAM University
+```bash
+docker compose up --build
+```
 
 ---
 
+## API Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/health` | Service health check |
+| `GET` | `/api/model` | Model info & status |
+| `GET` | `/api/scan-types` | Supported imaging modalities |
+| `POST` | `/api/predict` | Upload scan → diagnosis + Grad-CAM |
+| `GET` | `/api/stats` | Dashboard statistics |
+| `GET` | `/api/history` | Recent predictions |
+
+### Example: Predict
+
+```bash
+curl -X POST http://localhost:8000/api/predict \
+  -F "file=@chest_xray.jpg" \
+  -F "scan_type=chest_xray" \
+  -F "include_gradcam=true"
+```
+
+---
+
+## Model Performance
+
+From original research (extended dataset, 6568 images):
+
+| Task | Best Model | Accuracy | F1 | AUC |
+|------|-----------|----------|-----|-----|
+| Binary (COVID vs Normal) | InceptionResNetV2 | 99.59% | 0.996 | 99.2% |
+| 3-class | DenseNet121 | 79.0% | 0.82 | 92.0% |
+| Extended | DenseNet201 | 83.6% | 0.81 | 95.6% |
+
+PulmoScan AI uses **EfficientNetB0** for the best speed/accuracy tradeoff. Retrain with `ml_training/train.py` for dataset-specific results.
+
+---
+
+## Tech Stack
+
+- **Backend:** Python, FastAPI, TensorFlow/Keras, OpenCV
+- **Model:** EfficientNetB0 + custom classification head
+- **Frontend:** Vanilla JS, modern CSS (no build step)
+- **Deploy:** Docker, Uvicorn
+
+---
+
+## Roadmap
+
+- [ ] Expand to full 4-class dataset (Pneumonia + TB from Kaggle)
+- [ ] Ensemble models (EfficientNet + DenseNet + InceptionResNetV2)
+- [ ] DICOM file support
+- [ ] CT scan-specific model
+- [ ] Mobile app (React Native)
+- [ ] Cloud deployment (AWS/GCP)
+- [ ] FHIR integration for hospital systems
+
+---
+
+## Original Research
+
+Developed as a B.Tech final year project at **GITAM University** under **Dr. Don S. Kumar**.
+
+**Authors:** L. Naga Sai Sri Ravi Teja · S. Ritesh Dev · K. Bharath · T. Yashwanth Sai
+
+**Datasets:**
+- [Kaggle Chest X-ray Pneumonia](https://www.kaggle.com/paultimothymooney/chest-xray-pneumonia)
+- [education454 COVID-19 Dataset](https://github.com/education454/datasets)
+
+---
+
+## License
+
+MIT License — for research and educational use only. Not for clinical diagnosis.

@@ -3,101 +3,154 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PulmoScan AI — Lung Imaging Intelligence Platform</title>
-  <meta name="description" content="AI-powered analysis of chest X-rays, CT scans, and lung imaging. COVID-19, Pneumonia, Tuberculosis detection with explainable AI." />
+  <title>PulmoScan AI — Advanced Lung Imaging Intelligence</title>
+  <meta name="description" content="Next-gen AI platform for chest X-rays, CT scans, and lung imaging with 3D visualization and explainable AI." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/assets/css/style.css" />
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🫁</text></svg>" />
 </head>
 <body>
+  <div class="bg-scene">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <canvas id="particles" aria-hidden="true"></canvas>
+  </div>
+
   <div class="app-shell">
-    <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-brand">
-        <div class="brand-icon">
-          <svg viewBox="0 0 40 40" fill="none"><path d="M20 4C14 4 10 10 10 16c0 4 2 7 4 9v11h12V25c2-2 4-5 4-9 0-6-4-12-10-12z" stroke="currentColor" stroke-width="2" fill="none"/><path d="M16 20c0-2 1.5-4 4-4s4 2 4 4" stroke="currentColor" stroke-width="1.5"/></svg>
+        <div class="brand-3d">
+          <svg class="lung-3d" viewBox="0 0 120 120" fill="none">
+            <defs>
+              <linearGradient id="lungGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#00e5ff"/>
+                <stop offset="50%" stop-color="#a855f7"/>
+                <stop offset="100%" stop-color="#f472b6"/>
+              </linearGradient>
+              <filter id="glow"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            </defs>
+            <ellipse cx="60" cy="65" rx="45" ry="50" fill="url(#lungGrad)" opacity="0.15"/>
+            <path d="M60 20v25M45 45c-12 8-18 22-16 38 2 14 12 24 31 26M75 45c12 8 18 22 16 38-2 14-12 24-31 26" stroke="url(#lungGrad)" stroke-width="3" filter="url(#glow)"/>
+            <path d="M60 45c-8 0-14 6-14 14s6 14 14 14 14-6 14-14-6-14-14-14z" fill="url(#lungGrad)" opacity="0.6"/>
+          </svg>
         </div>
         <div>
-          <h1>PulmoScan<span>AI</span></h1>
-          <p>Lung Imaging Platform</p>
+          <h1>PulmoScan <span>AI</span></h1>
+          <p>Advanced Lung Intelligence</p>
         </div>
       </div>
 
       <nav class="sidebar-nav">
         <button class="nav-item active" data-section="analyze">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-          Analyze Scan
+          <span class="nav-icon">◈</span> Analyze Scan
         </button>
         <button class="nav-item" data-section="dashboard">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-          Dashboard
+          <span class="nav-icon">▦</span> Dashboard
         </button>
         <button class="nav-item" data-section="history">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-          History
+          <span class="nav-icon">◷</span> History
         </button>
         <button class="nav-item" data-section="about">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-          About
+          <span class="nav-icon">ⓘ</span> About
         </button>
       </nav>
 
-      <div class="sidebar-status" id="model-status">
+      <div class="sidebar-status glass" id="model-status">
         <div class="status-dot loading"></div>
-        <span>Checking model...</span>
+        <div>
+          <strong id="status-title">Initializing</strong>
+          <span id="status-sub">Loading AI engine...</span>
+        </div>
       </div>
     </aside>
 
-    <!-- Main content -->
     <main class="main-content">
-      <header class="top-bar">
-        <button class="menu-toggle" id="menu-toggle" aria-label="Toggle menu">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-        </button>
+      <header class="top-bar glass">
+        <button class="menu-toggle" id="menu-toggle" aria-label="Menu">☰</button>
         <div class="top-bar-title" id="page-title">Analyze Scan</div>
         <div class="top-bar-actions">
-          <span class="badge badge-live">● Live</span>
+          <span class="chip chip-ai">⚡ EfficientNet + TTA</span>
+          <span class="chip chip-live">● Live</span>
         </div>
       </header>
 
-      <!-- ANALYZE SECTION -->
+      <!-- ANALYZE -->
       <section class="section active" id="section-analyze">
-        <div class="hero-banner">
-          <div class="hero-text">
-            <h2>Intelligent Lung Scan Analysis</h2>
-            <p>Upload chest X-rays, CT slices, or related imaging. Our EfficientNet-based AI delivers multi-class detection with Grad-CAM explainability.</p>
+        <div class="hero-3d">
+          <div class="hero-copy">
+            <span class="eyebrow">Next-Gen Medical Imaging</span>
+            <h2>3D Lung Scan Intelligence</h2>
+            <p>Upload chest X-rays or CT slices. Our AI uses CLAHE enhancement, test-time augmentation, and Grad-CAM explainability for precise multi-pathology detection.</p>
+            <div class="hero-pills">
+              <span class="pill">COVID-19</span>
+              <span class="pill">Pneumonia</span>
+              <span class="pill">Tuberculosis</span>
+              <span class="pill">Normal</span>
+            </div>
           </div>
-          <div class="hero-stats" id="hero-stats">
-            <div class="hero-stat"><span class="stat-num" id="stat-accuracy">—</span><span class="stat-label">Model Status</span></div>
-            <div class="hero-stat"><span class="stat-num">4</span><span class="stat-label">Conditions</span></div>
-            <div class="hero-stat"><span class="stat-num">224²</span><span class="stat-label">Resolution</span></div>
+          <div class="hero-visual">
+            <div class="scan-orbit">
+              <div class="orbit-ring ring-1"></div>
+              <div class="orbit-ring ring-2"></div>
+              <div class="orbit-core">
+                <svg viewBox="0 0 200 200" class="torso-3d">
+                  <defs>
+                    <radialGradient id="coreGrad" cx="50%" cy="40%"><stop offset="0%" stop-color="#00e5ff"/><stop offset="100%" stop-color="#7c3aed"/></radialGradient>
+                  </defs>
+                  <ellipse cx="100" cy="100" rx="70" ry="85" fill="url(#coreGrad)" opacity="0.2"/>
+                  <path d="M100 35c-25 0-40 30-40 60 0 20 8 40 20 55v30h40v-30c12-15 20-35 20-55 0-30-15-60-40-60z" stroke="#00e5ff" stroke-width="2" fill="none" opacity="0.8"/>
+                  <path d="M75 90c0-15 10-25 25-25s25 10 25 25" stroke="#a855f7" stroke-width="2" fill="none"/>
+                  <circle cx="100" cy="95" r="8" fill="#00e5ff" opacity="0.6">
+                    <animate attributeName="r" values="6;10;6" dur="2s" repeatCount="indefinite"/>
+                  </circle>
+                </svg>
+              </div>
+            </div>
+            <div class="hero-metrics">
+              <div class="metric-3d"><span id="stat-accuracy">—</span><label>AI Status</label></div>
+              <div class="metric-3d"><span>4</span><label>Pathologies</label></div>
+              <div class="metric-3d"><span>224²</span><label>Resolution</label></div>
+            </div>
           </div>
         </div>
 
-        <!-- Scan type selector -->
-        <div class="scan-types-grid" id="scan-types"></div>
+        <!-- Modality cards -->
+        <div class="modality-row" id="scan-types"></div>
 
-        <!-- Upload + Results grid -->
+        <!-- Sample gallery -->
+        <div class="card glass sample-gallery">
+          <div class="card-header">
+            <h3>📡 Sample Scans — Try Instantly</h3>
+            <span class="card-sub">Load X-ray or CT samples with one click</span>
+          </div>
+          <div class="sample-tabs">
+            <button class="sample-tab active" data-tab="chest_xray">🩻 X-Ray Samples</button>
+            <button class="sample-tab" data-tab="ct_scan">🖥️ CT Scan Samples</button>
+          </div>
+          <div class="sample-grid" id="sample-grid"></div>
+        </div>
+
         <div class="analyze-grid">
-          <div class="card upload-card">
+          <div class="card glass upload-card">
             <div class="card-header">
               <h3>Upload Imaging</h3>
-              <span class="card-sub">JPG, PNG, TIFF, BMP · Max 20 MB</span>
+              <span class="card-sub">JPG · PNG · TIFF · DICOM-ready · 20 MB max</span>
             </div>
-            <div class="dropzone" id="dropzone">
+            <div class="dropzone-3d" id="dropzone">
               <input type="file" id="file-input" accept="image/*" hidden />
               <div class="dropzone-content" id="dropzone-content">
-                <div class="dropzone-icon">
-                  <svg viewBox="0 0 64 64" fill="none"><rect x="8" y="12" width="48" height="40" rx="4" stroke="currentColor" stroke-width="2"/><circle cx="32" cy="28" r="10" stroke="currentColor" stroke-width="2"/><path d="M8 44l12-12 8 8 12-16 16 20" stroke="currentColor" stroke-width="2"/></svg>
+                <div class="upload-3d-icon">
+                  <div class="icon-cube"></div>
                 </div>
-                <p class="dropzone-title">Drag & drop your scan here</p>
-                <p class="dropzone-sub">or click to browse files</p>
+                <p class="dropzone-title">Drop scan here</p>
+                <p class="dropzone-sub">or click to browse · X-Ray & CT supported</p>
               </div>
               <div class="preview-container hidden" id="preview-container">
-                <img id="preview-image" alt="Uploaded scan preview" />
-                <button class="btn-clear" id="clear-upload" title="Remove">✕</button>
+                <img id="preview-image" alt="Scan preview" />
+                <div class="scan-type-tag" id="preview-scan-tag">Chest X-Ray</div>
+                <button class="btn-clear" id="clear-upload">✕</button>
               </div>
             </div>
             <div class="upload-actions">
@@ -106,158 +159,125 @@
                 <span class="toggle-switch"></span>
                 Grad-CAM heatmap
               </label>
-              <button class="btn btn-primary" id="analyze-btn" disabled>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                Run Analysis
+              <button class="btn btn-glow" id="analyze-btn" disabled>
+                ⚡ Run AI Analysis
               </button>
             </div>
           </div>
 
-          <div class="card results-card" id="results-card">
+          <div class="card glass results-card" id="results-card">
             <div class="card-header">
-              <h3>Analysis Results</h3>
+              <h3>AI Diagnosis</h3>
               <span class="card-sub" id="results-timestamp"></span>
             </div>
             <div class="results-empty" id="results-empty">
-              <div class="empty-icon">🔬</div>
-              <p>Upload a scan and click <strong>Run Analysis</strong> to see AI-powered results with confidence scores and explainability heatmaps.</p>
+              <div class="empty-3d">🫁</div>
+              <p>Upload a scan or load a <strong>sample image</strong> above, then run AI analysis to see confidence scores, 3D-style metrics, and Grad-CAM heatmaps.</p>
             </div>
             <div class="results-content hidden" id="results-content">
-              <div class="diagnosis-banner" id="diagnosis-banner">
-                <div class="diagnosis-icon" id="diagnosis-icon"></div>
-                <div>
-                  <div class="diagnosis-label">Primary Finding</div>
-                  <div class="diagnosis-value" id="diagnosis-value"></div>
-                  <div class="confidence-bar-wrap">
-                    <div class="confidence-bar" id="confidence-bar"></div>
+              <div class="result-hero">
+                <div class="confidence-ring-wrap">
+                  <svg class="confidence-ring" viewBox="0 0 120 120">
+                    <circle cx="60" cy="60" r="52" class="ring-bg"/>
+                    <circle cx="60" cy="60" r="52" class="ring-fill" id="confidence-ring"/>
+                  </svg>
+                  <div class="ring-label">
+                    <span id="ring-pct">0%</span>
+                    <small>confidence</small>
                   </div>
-                  <div class="confidence-text" id="confidence-text"></div>
                 </div>
-                <div class="risk-badge" id="risk-badge"></div>
+                <div class="result-main">
+                  <span class="result-eyebrow">Primary Finding</span>
+                  <div class="diagnosis-value" id="diagnosis-value">—</div>
+                  <div class="diagnosis-icon-row" id="diagnosis-icon"></div>
+                  <div class="risk-badge" id="risk-badge"></div>
+                  <div class="demo-banner hidden" id="demo-banner">
+                    ⚠️ Demo mode — train model for clinical accuracy: <code>python ml_training/train.py --quick</code>
+                  </div>
+                </div>
               </div>
 
-              <div class="probabilities" id="probabilities"></div>
+              <div class="prob-grid" id="probabilities"></div>
 
               <div class="recommendation-box" id="recommendation-box">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                <span class="rec-icon">💡</span>
                 <p id="recommendation-text"></p>
               </div>
 
               <div class="gradcam-section hidden" id="gradcam-section">
-                <h4>Grad-CAM Explainability</h4>
-                <p class="gradcam-desc">Highlighted regions indicate areas that most influenced the AI decision.</p>
-                <img id="gradcam-image" alt="Grad-CAM heatmap overlay" />
+                <h4>🔥 Grad-CAM Explainability</h4>
+                <p class="gradcam-desc">Neural attention heatmap — brighter regions drove the AI decision</p>
+                <div class="gradcam-frame">
+                  <img id="gradcam-image" alt="Grad-CAM overlay" />
+                </div>
               </div>
             </div>
             <div class="loading-overlay hidden" id="loading-overlay">
-              <div class="spinner"></div>
-              <p>Analyzing scan with EfficientNet...</p>
+              <div class="loader-3d"></div>
+              <p>Running CLAHE + TTA inference...</p>
             </div>
           </div>
         </div>
 
-        <div class="disclaimer">
-          ⚠️ <strong>Research & screening tool only.</strong> Not FDA/CE approved. Always consult qualified medical professionals for diagnosis and treatment decisions.
+        <div class="disclaimer glass">
+          ⚠️ <strong>Research screening tool only.</strong> Not FDA/CE approved. Always consult qualified medical professionals.
         </div>
       </section>
 
-      <!-- DASHBOARD SECTION -->
+      <!-- DASHBOARD -->
       <section class="section" id="section-dashboard">
-        <div class="dashboard-grid" id="dashboard-grid">
-          <div class="metric-card">
-            <div class="metric-icon blue">📊</div>
+        <div class="dashboard-grid">
+          <div class="metric-card glass metric-total">
+            <div class="metric-3d-icon">📊</div>
             <div class="metric-value" id="dash-total">0</div>
-            <div class="metric-label">Total Scans Analyzed</div>
+            <div class="metric-label">Total Scans</div>
           </div>
-          <div class="metric-card">
-            <div class="metric-icon green">✅</div>
+          <div class="metric-card glass">
+            <div class="metric-3d-icon">✅</div>
             <div class="metric-value" id="dash-normal">0</div>
-            <div class="metric-label">Normal Results</div>
+            <div class="metric-label">Normal</div>
           </div>
-          <div class="metric-card">
-            <div class="metric-icon red">🦠</div>
+          <div class="metric-card glass">
+            <div class="metric-3d-icon">🦠</div>
             <div class="metric-value" id="dash-covid">0</div>
-            <div class="metric-label">COVID-19 Flags</div>
+            <div class="metric-label">COVID-19</div>
           </div>
-          <div class="metric-card">
-            <div class="metric-icon orange">🫁</div>
+          <div class="metric-card glass">
+            <div class="metric-3d-icon">🫁</div>
             <div class="metric-value" id="dash-pneumonia">0</div>
-            <div class="metric-label">Pneumonia Flags</div>
+            <div class="metric-label">Pneumonia</div>
           </div>
         </div>
-
-        <div class="card">
-          <div class="card-header"><h3>Detection Breakdown</h3></div>
-          <div class="breakdown-chart" id="breakdown-chart"></div>
-        </div>
-
-        <div class="card">
-          <div class="card-header"><h3>Supported Imaging Modalities</h3></div>
-          <div class="modalities-list" id="modalities-list"></div>
-        </div>
+        <div class="card glass"><div class="card-header"><h3>Detection Analytics</h3></div><div class="breakdown-chart" id="breakdown-chart"></div></div>
+        <div class="card glass"><div class="card-header"><h3>Imaging Modalities</h3></div><div class="modalities-list" id="modalities-list"></div></div>
       </section>
 
-      <!-- HISTORY SECTION -->
+      <!-- HISTORY -->
       <section class="section" id="section-history">
-        <div class="card">
-          <div class="card-header"><h3>Recent Analyses</h3></div>
-          <div class="history-list" id="history-list">
-            <p class="empty-state">No analyses yet. Upload a scan to get started.</p>
-          </div>
+        <div class="card glass">
+          <div class="card-header"><h3>Analysis History</h3></div>
+          <div class="history-list" id="history-list"><p class="empty-state">No analyses yet.</p></div>
         </div>
       </section>
 
-      <!-- ABOUT SECTION -->
+      <!-- ABOUT -->
       <section class="section" id="section-about">
         <div class="about-grid">
-          <div class="card">
-            <div class="card-header"><h3>Platform Overview</h3></div>
-            <p class="about-text">PulmoScan AI is an enterprise-grade lung imaging intelligence platform built on transfer learning with <strong>EfficientNetB0</strong>. It classifies chest imaging into four categories: COVID-19, Normal, Pneumonia, and Tuberculosis.</p>
+          <div class="card glass">
+            <h3>Platform Overview</h3>
+            <p class="about-text">Enterprise lung imaging AI with EfficientNetB0, CLAHE preprocessing, test-time augmentation, and Grad-CAM explainability. Supports chest X-rays and CT axial slices.</p>
             <ul class="feature-list">
-              <li>🔬 EfficientNetB0 transfer learning (ImageNet → medical fine-tune)</li>
-              <li>🎯 Multi-class detection with confidence scoring</li>
-              <li>🔥 Grad-CAM explainability heatmaps</li>
-              <li>📱 Responsive clinical-grade UI</li>
-              <li>🐳 Docker-ready deployment</li>
-              <li>📈 Real-time dashboard & history tracking</li>
+              <li>⚡ EfficientNetB0 + TTA + CLAHE pipeline</li>
+              <li>🩻 Chest X-Ray & CT scan analysis</li>
+              <li>🔥 Grad-CAM neural attention maps</li>
+              <li>📊 Real-time analytics dashboard</li>
             </ul>
           </div>
-          <div class="card">
-            <div class="card-header"><h3>Tech Stack</h3></div>
-            <div class="tech-grid">
-              <div class="tech-item"><span>Python 3.11</span></div>
-              <div class="tech-item"><span>TensorFlow / Keras</span></div>
-              <div class="tech-item"><span>EfficientNetB0</span></div>
-              <div class="tech-item"><span>FastAPI</span></div>
-              <div class="tech-item"><span>OpenCV</span></div>
-              <div class="tech-item"><span>Grad-CAM</span></div>
-              <div class="tech-item"><span>Docker</span></div>
-              <div class="tech-item"><span>Vanilla JS UI</span></div>
-            </div>
-          </div>
-          <div class="card">
-            <div class="card-header"><h3>Getting Started</h3></div>
-            <pre class="code-block"><code># Install
-pip install -r requirements.txt
-pip install -r requirements-dev.txt
-
-# Run tests
-make test-fast        # quick unit + API tests
-make test             # full suite incl. inference
-
-# Train model
+          <div class="card glass">
+            <h3>Improve Accuracy</h3>
+            <pre class="code-block"><code>python scripts/download_data.py
 python ml_training/train.py --quick
-
-# Start platform
-python3 run.py
-
-# CLI prediction
-python3 scripts/predict.py scan.png</code></pre>
-          </div>
-          <div class="card">
-            <div class="card-header"><h3>Original Research</h3></div>
-            <p class="about-text">Evolving from a GITAM University B.Tech project on COVID-19 detection using deep learning, PulmoScan AI expands the scope to a full lung imaging platform with modern architecture, explainable AI, and production deployment.</p>
-            <p class="about-text"><strong>Authors:</strong> L. Naga Sai Sri Ravi Teja, S. Ritesh Dev, K. Bharath, T. Yashwanth Sai<br/><strong>Guide:</strong> Dr. Don S. Kumar, GITAM University</p>
+python3 run.py</code></pre>
           </div>
         </div>
       </section>

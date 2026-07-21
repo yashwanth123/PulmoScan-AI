@@ -29,6 +29,8 @@ class PredictionResponse(BaseModel):
     recommendation: str
     gradcam_image: str | None = None
     model_loaded: bool = True
+    demo_mode: bool = False
+    tta_enabled: bool = True
     timestamp: str
 
 

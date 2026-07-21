@@ -58,6 +58,15 @@ def test_frontend_index(client) -> None:
     assert "PulmoScan" in response.text
 
 
+def test_samples_list(client) -> None:
+    response = client.get("/api/samples")
+    assert response.status_code == 200
+    data = response.json()
+    assert "chest_xray" in data["samples"]
+    assert "ct_scan" in data["samples"]
+    assert len(data["samples"]["ct_scan"]) >= 1
+
+
 def test_predict_rejects_empty_file(client) -> None:
     response = client.post(
         "/api/predict",

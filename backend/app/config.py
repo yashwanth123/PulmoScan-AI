@@ -26,20 +26,58 @@ SCAN_TYPES = {
         "icon": "xray",
         "description": "PA/AP chest radiograph analysis",
         "supported": True,
+        "color": "#00e5ff",
     },
     "ct_scan": {
         "name": "CT Scan",
         "icon": "ct",
-        "description": "Chest CT slice analysis (experimental)",
+        "description": "Axial chest CT slice analysis",
         "supported": True,
+        "color": "#a855f7",
     },
     "mri": {
         "name": "Chest MRI",
         "icon": "mri",
         "description": "MRI lung imaging (coming soon)",
         "supported": False,
+        "color": "#64748b",
     },
 }
+
+# Public sample images for demo/testing (Wikimedia & open datasets)
+SAMPLE_IMAGES = {
+    "chest_xray": [
+        {
+            "id": "xray_normal",
+            "name": "Normal Chest X-Ray",
+            "label_hint": "Normal",
+            "url": "https://upload.wikimedia.org/wikipedia/commons/8/8f/Chest_Xray_PA_3-8-2010.png",
+        },
+        {
+            "id": "xray_pa",
+            "name": "PA Radiograph",
+            "label_hint": "Screening",
+            "url": "https://upload.wikimedia.org/wikipedia/commons/c/c8/Pneumonia_X-ray.jpg",
+        },
+    ],
+    "ct_scan": [
+        {
+            "id": "ct_chest",
+            "name": "Chest CT Axial Slice",
+            "label_hint": "CT Analysis",
+            "url": "https://upload.wikimedia.org/wikipedia/commons/4/4e/CT_of_a_normal_Thorax%2C_axial_plane_%2830%29.jpg",
+        },
+        {
+            "id": "ct_lung",
+            "name": "Lung CT Cross-section",
+            "label_hint": "High-res CT",
+            "url": "https://upload.wikimedia.org/wikipedia/commons/6/6e/CT_scan_of_the_Thorax_%28axial%29_%281%29.jpg",
+        },
+    ],
+}
+
+# Default binary classes when model is not yet fine-tuned
+BINARY_CLASS_NAMES = ["COVID-19", "Normal"]
 
 # Training defaults
 TRAIN_CONFIG = {

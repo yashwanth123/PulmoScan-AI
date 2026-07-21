@@ -5,16 +5,15 @@ import logging
 import threading
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from pathlib import Path
 from typing import Any
 
 import numpy as np
 import tensorflow as tf
 
-from backend.app.config import CLASS_NAMES, IMG_SIZE, MODEL_PATH, SCAN_TYPES
+from backend.app.config import BINARY_CLASS_NAMES, CLASS_NAMES, IMG_SIZE, MODEL_PATH, SCAN_TYPES
 from backend.app.ml.gradcam import generate_gradcam
 from backend.app.ml.model import build_model, compile_model
-from backend.app.ml.preprocessing import load_image_from_bytes, preprocess_for_model
+from backend.app.ml.preprocessing import build_tta_batch, load_image_from_bytes, preprocess_for_model
 
 logger = logging.getLogger(__name__)
 
@@ -36,6 +35,8 @@ class PredictionResult:
     recommendation: str
     gradcam_image: str | None = None
     model_loaded: bool = True
+    demo_mode: bool = False
+    tta_enabled: bool = True
     timestamp: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
     def to_dict(self) -> dict[str, Any]:
@@ -48,12 +49,24 @@ class PredictionResult:
             "recommendation": self.recommendation,
             "gradcam_image": self.gradcam_image,
             "model_loaded": self.model_loaded,
+            "demo_mode": self.demo_mode,
+            "tta_enabled": self.tta_enabled,
             "timestamp": self.timestamp,
         }
 
 
-def _risk_and_recommendation(label: str, confidence: float) -> tuple[str, str]:
+def _risk_and_recommendation(
+    label: str,
+    confidence: float,
+    demo_mode: bool = False,
+) -> tuple[str, str]:
     """Map diagnosis to risk level and clinical recommendation text."""
+    if demo_mode and confidence < 0.55:
+        return "uncertain", (
+            "Demo mode — model not fine-tuned on lung data. "
+            "Run `python ml_training/train.py --quick` for reliable results."
+        )
+
     high_risk = {"COVID-19", "Pneumonia", "Tuberculosis"}
     if label in high_risk:
         if confidence >= 0.85:
@@ -84,7 +97,20 @@ def _risk_and_recommendation(label: str, confidence: float) -> tuple[str, str]:
                 "Classification uncertain. Please consult a radiologist "
                 "for professional interpretation."
             )
+
+    if demo_mode:
+        rec += " Note: Train the model with `python ml_training/train.py` for clinical-grade accuracy."
+
     return risk, rec
+
+
+def _resolve_class_names(num_outputs: int) -> list[str]:
+    """Map model output dimension to human-readable labels."""
+    if num_outputs == len(BINARY_CLASS_NAMES):
+        return list(BINARY_CLASS_NAMES)
+    if num_outputs == len(CLASS_NAMES):
+        return list(CLASS_NAMES)
+    return [f"Class_{i}" for i in range(num_outputs)]
 
 
 def load_model(force: bool = False) -> tf.keras.Model:
@@ -99,11 +125,11 @@ def load_model(force: bool = False) -> tf.keras.Model:
             _model = tf.keras.models.load_model(str(MODEL_PATH))
         else:
             logger.warning(
-                "No trained weights at %s — using ImageNet-pretrained backbone. "
+                "No trained weights at %s — binary demo model (COVID-19 vs Normal). "
                 "Run `python ml_training/train.py` for accurate predictions.",
                 MODEL_PATH,
             )
-            _model = build_model()
+            _model = build_model(num_classes=len(BINARY_CLASS_NAMES))
             compile_model(_model)
 
         return _model
@@ -111,13 +137,23 @@ def load_model(force: bool = False) -> tf.keras.Model:
 
 def get_model_status() -> dict[str, Any]:
     """Return model availability info."""
+    trained = MODEL_PATH.exists()
     return {
         "model_path": str(MODEL_PATH),
-        "model_exists": MODEL_PATH.exists(),
-        "classes": CLASS_NAMES,
-        "architecture": "EfficientNetB0 + custom head",
+        "model_exists": trained,
+        "classes": CLASS_NAMES if trained else BINARY_CLASS_NAMES,
+        "architecture": "EfficientNetB0 + TTA + CLAHE preprocessing",
         "input_size": list(IMG_SIZE),
+        "demo_mode": not trained,
+        "tta_enabled": True,
     }
+
+
+def _run_inference(model: tf.keras.Model, img, scan_type: str) -> np.ndarray:
+    """Run test-time augmented inference and return averaged probabilities."""
+    batch = build_tta_batch(img, scan_type=scan_type)
+    predictions = model.predict(batch, verbose=0)
+    return predictions.mean(axis=0)
 
 
 def predict(
@@ -127,22 +163,26 @@ def predict(
 ) -> PredictionResult:
     """Run full inference pipeline on uploaded scan."""
     model = load_model()
+    demo_mode = not MODEL_PATH.exists()
     img = load_image_from_bytes(image_bytes)
-    tensor = preprocess_for_model(img)
 
-    probs = model.predict(tensor, verbose=0)[0]
+    probs = _run_inference(model, img, scan_type)
     num_outputs = len(probs)
-    active_classes = CLASS_NAMES[:num_outputs]
-    # Pad remaining classes with zero probability for UI consistency
+    active_classes = _resolve_class_names(num_outputs)
+
     prob_map = {name: 0.0 for name in CLASS_NAMES}
     for i, name in enumerate(active_classes):
-        prob_map[name] = float(probs[i])
+        if name in prob_map:
+            prob_map[name] = float(probs[i])
+        elif i < len(probs):
+            prob_map[CLASS_NAMES[i] if i < len(CLASS_NAMES) else name] = float(probs[i])
 
     idx = int(np.argmax(probs))
     label = active_classes[idx]
     confidence = float(probs[idx])
-    risk, rec = _risk_and_recommendation(label, confidence)
+    risk, rec = _risk_and_recommendation(label, confidence, demo_mode=demo_mode)
 
+    tensor = preprocess_for_model(img, scan_type=scan_type)
     gradcam_b64 = None
     if include_gradcam:
         try:
@@ -160,6 +200,8 @@ def predict(
         recommendation=rec,
         gradcam_image=gradcam_b64,
         model_loaded=MODEL_PATH.exists(),
+        demo_mode=demo_mode,
+        tta_enabled=True,
     )
 
     _record_prediction(result, scan_type)

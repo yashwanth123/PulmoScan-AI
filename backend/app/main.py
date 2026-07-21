@@ -10,7 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
-from backend.app.api.routes import health, predict
+from backend.app.api.routes import health, predict, samples
 from backend.app.config import FRONTEND_DIR
 from backend.app.ml.predictor import load_model
 
@@ -44,6 +44,7 @@ app.add_middleware(
 
 app.include_router(health.router)
 app.include_router(predict.router)
+app.include_router(samples.router)
 
 # Static frontend assets
 if (FRONTEND_DIR / "assets").exists():

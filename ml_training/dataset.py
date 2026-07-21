@@ -80,7 +80,6 @@ def build_generators(
     train_datagen = ImageDataGenerator(
         rescale=1.0 / 255,
         validation_split=validation_split,
-        seed=42,
         rotation_range=15,
         width_shift_range=0.1,
         height_shift_range=0.1,
@@ -89,11 +88,10 @@ def build_generators(
         brightness_range=(0.8, 1.2),
         fill_mode="nearest",
     )
-    # Must use validation_split + same seed; eval_datagen had no split → 0 val images
+    # Same validation_split required — without it Keras returns 0 validation images
     val_datagen = ImageDataGenerator(
         rescale=1.0 / 255,
         validation_split=validation_split,
-        seed=42,
     )
     test_datagen = ImageDataGenerator(rescale=1.0 / 255)
 

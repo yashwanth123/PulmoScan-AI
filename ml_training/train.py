@@ -80,17 +80,23 @@ def train() -> None:
         class_labels,
     )
 
+    if val_flow.samples == 0:
+        logger.warning("Validation set is empty — using training accuracy for checkpoints")
+
     model = build_model(num_classes=num_classes, trainable_base=False)
     compile_model(model, learning_rate=args.lr)
 
     checkpoint = MODEL_PATH.parent / "checkpoint.keras"
     log_dir = ROOT / "logs" / "tensorboard"
-    callbacks = get_callbacks(str(checkpoint), str(log_dir))
+    use_val = val_flow.samples > 0
+    callbacks = get_callbacks(str(checkpoint), str(log_dir), use_validation=use_val)
+
+    val_data = val_flow if use_val else None
 
     logger.info("Phase 1 — training classification head (%d epochs)", args.epochs)
     model.fit(
         train_flow,
-        validation_data=val_flow,
+        validation_data=val_data,
         epochs=args.epochs,
         class_weight=compute_class_weights(train_flow),
         callbacks=callbacks,
@@ -102,7 +108,7 @@ def train() -> None:
         fine_tune_backbone(model, args.fine_tune_lr)
         model.fit(
             train_flow,
-            validation_data=val_flow,
+            validation_data=val_data,
             epochs=args.fine_tune_epochs,
             class_weight=compute_class_weights(train_flow),
             callbacks=callbacks,

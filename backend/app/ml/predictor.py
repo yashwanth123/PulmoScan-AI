@@ -37,6 +37,8 @@ class PredictionResult:
     model_loaded: bool = True
     demo_mode: bool = False
     tta_enabled: bool = True
+    reliability: str = "demo"
+    reliability_message: str = ""
     timestamp: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
     def to_dict(self) -> dict[str, Any]:
@@ -51,8 +53,33 @@ class PredictionResult:
             "model_loaded": self.model_loaded,
             "demo_mode": self.demo_mode,
             "tta_enabled": self.tta_enabled,
+            "reliability": self.reliability,
+            "reliability_message": self.reliability_message,
             "timestamp": self.timestamp,
         }
+
+
+def _compute_reliability(confidence: float, model_loaded: bool) -> tuple[str, str]:
+    """Tell the user how much to trust this specific prediction."""
+    if not model_loaded:
+        return (
+            "demo",
+            "Model not trained — this prediction is a demo only and is often incorrect.",
+        )
+    if confidence >= 0.85:
+        return (
+            "high",
+            "High confidence — the model is fairly sure. Still verify with a doctor.",
+        )
+    if confidence >= 0.65:
+        return (
+            "medium",
+            "Moderate confidence — result may be correct but should be confirmed.",
+        )
+    return (
+        "low",
+        "Low confidence — prediction is unreliable. Try a trained model or another image.",
+    )
 
 
 def _risk_and_recommendation(
@@ -180,6 +207,7 @@ def predict(
     idx = int(np.argmax(probs))
     label = active_classes[idx]
     confidence = float(probs[idx])
+    reliability, reliability_msg = _compute_reliability(confidence, MODEL_PATH.exists())
     risk, rec = _risk_and_recommendation(label, confidence, demo_mode=demo_mode)
 
     tensor = preprocess_for_model(img, scan_type=scan_type)
@@ -202,6 +230,8 @@ def predict(
         model_loaded=MODEL_PATH.exists(),
         demo_mode=demo_mode,
         tta_enabled=True,
+        reliability=reliability,
+        reliability_message=reliability_msg,
     )
 
     _record_prediction(result, scan_type)

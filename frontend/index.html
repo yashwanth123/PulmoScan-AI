@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PulmoScan AI — Advanced Lung Imaging Intelligence</title>
-  <meta name="description" content="Next-gen AI platform for chest X-rays, CT scans, and lung imaging with 3D visualization and explainable AI." />
+  <title>PulmoScan AI — Chest X-Ray & CT Analysis</title>
+  <meta name="description" content="AI analysis for chest X-rays and CT scans. Verify accuracy with labeled samples and model metrics." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -38,7 +38,7 @@
         </div>
         <div>
           <h1>PulmoScan <span>AI</span></h1>
-          <p>Advanced Lung Intelligence</p>
+          <p>Chest X-Ray & CT AI</p>
         </div>
       </div>
 
@@ -80,9 +80,9 @@
       <section class="section active" id="section-analyze">
         <div class="hero-3d">
           <div class="hero-copy">
-            <span class="eyebrow">Next-Gen Medical Imaging</span>
-            <h2>3D Lung Scan Intelligence</h2>
-            <p>Upload chest X-rays or CT slices. Our AI uses CLAHE enhancement, test-time augmentation, and Grad-CAM explainability for precise multi-pathology detection.</p>
+            <span class="eyebrow">Medical Imaging AI</span>
+            <h2>Chest X-Ray & CT Analysis</h2>
+            <p>Upload chest X-rays or CT slices for AI-assisted screening. Uses CLAHE enhancement, test-time augmentation, and Grad-CAM heatmaps. <em>Not true 3D scanning</em> — premium visual interface only.</p>
             <div class="hero-pills">
               <span class="pill">COVID-19</span>
               <span class="pill">Pneumonia</span>
@@ -118,6 +118,10 @@
 
         <!-- Modality cards -->
         <div class="modality-row" id="scan-types"></div>
+
+        <div class="info-banner glass hidden" id="mri-notice">
+          🧲 <strong>Chest MRI</strong> is not supported yet. Please use <strong>Chest X-Ray</strong> or <strong>CT Scan</strong> uploads.
+        </div>
 
         <!-- Sample gallery -->
         <div class="card glass sample-gallery">
@@ -172,7 +176,7 @@
             </div>
             <div class="results-empty" id="results-empty">
               <div class="empty-3d">🫁</div>
-              <p>Upload a scan or load a <strong>sample image</strong> above, then run AI analysis to see confidence scores, 3D-style metrics, and Grad-CAM heatmaps.</p>
+              <p>Upload a scan or click a <strong>sample image</strong> (with known labels) to test if the model prediction is correct.</p>
             </div>
             <div class="results-content hidden" id="results-content">
               <div class="result-hero">
@@ -191,10 +195,24 @@
                   <div class="diagnosis-value" id="diagnosis-value">—</div>
                   <div class="diagnosis-icon-row" id="diagnosis-icon"></div>
                   <div class="risk-badge" id="risk-badge"></div>
+                  <div class="reliability-badge hidden" id="reliability-badge"></div>
                   <div class="demo-banner hidden" id="demo-banner">
                     ⚠️ Demo mode — train model for clinical accuracy: <code>python ml_training/train.py --quick</code>
                   </div>
                 </div>
+              </div>
+
+              <div class="validation-card hidden glass" id="validation-card">
+                <h4>✓ Label Check (is the model correct?)</h4>
+                <div class="validation-row">
+                  <span>Expected (sample label):</span>
+                  <strong id="validation-expected">—</strong>
+                </div>
+                <div class="validation-row">
+                  <span>AI predicted:</span>
+                  <strong id="validation-predicted">—</strong>
+                </div>
+                <div class="validation-result" id="validation-result"></div>
               </div>
 
               <div class="prob-grid" id="probabilities"></div>
@@ -248,6 +266,15 @@
             <div class="metric-label">Pneumonia</div>
           </div>
         </div>
+        <div class="card glass model-accuracy-card">
+          <div class="card-header">
+            <h3>🎯 Model Accuracy — How to Know If Results Are Correct</h3>
+          </div>
+          <div id="model-accuracy-panel">
+            <p class="about-text">Loading model status...</p>
+          </div>
+          <ol class="verify-steps" id="verify-steps"></ol>
+        </div>
         <div class="card glass"><div class="card-header"><h3>Detection Analytics</h3></div><div class="breakdown-chart" id="breakdown-chart"></div></div>
         <div class="card glass"><div class="card-header"><h3>Imaging Modalities</h3></div><div class="modalities-list" id="modalities-list"></div></div>
       </section>
@@ -267,10 +294,10 @@
             <h3>Platform Overview</h3>
             <p class="about-text">Enterprise lung imaging AI with EfficientNetB0, CLAHE preprocessing, test-time augmentation, and Grad-CAM explainability. Supports chest X-rays and CT axial slices.</p>
             <ul class="feature-list">
-              <li>⚡ EfficientNetB0 + TTA + CLAHE pipeline</li>
-              <li>🩻 Chest X-Ray & CT scan analysis</li>
-              <li>🔥 Grad-CAM neural attention maps</li>
-              <li>📊 Real-time analytics dashboard</li>
+              <li>🩻 Chest X-Ray analysis (primary — model trained on this)</li>
+              <li>🖥️ CT scan slice upload (experimental)</li>
+              <li>🧲 Chest MRI — <strong>not available yet</strong></li>
+              <li>✓ Sample images include known labels to verify predictions</li>
             </ul>
           </div>
           <div class="card glass">

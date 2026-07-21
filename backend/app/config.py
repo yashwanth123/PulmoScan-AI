@@ -38,39 +38,44 @@ SCAN_TYPES = {
     "mri": {
         "name": "Chest MRI",
         "icon": "mri",
-        "description": "MRI lung imaging (coming soon)",
+        "description": "Not available yet — upload not supported",
         "supported": False,
         "color": "#64748b",
+        "status_note": "Planned for a future release. Use Chest X-Ray or CT Scan.",
     },
 }
 
-# Public sample images for demo/testing (Wikimedia & open datasets)
+# Public sample images — expected_label used to verify predictions in the UI
 SAMPLE_IMAGES = {
     "chest_xray": [
         {
             "id": "xray_normal",
             "name": "Normal Chest X-Ray",
-            "label_hint": "Normal",
+            "label_hint": "Known label: Normal",
+            "expected_label": "Normal",
             "url": "https://upload.wikimedia.org/wikipedia/commons/8/8f/Chest_Xray_PA_3-8-2010.png",
         },
         {
-            "id": "xray_pa",
-            "name": "PA Radiograph",
-            "label_hint": "Screening",
+            "id": "xray_pneumonia",
+            "name": "Pneumonia X-Ray",
+            "label_hint": "Known label: Pneumonia",
+            "expected_label": "Pneumonia",
             "url": "https://upload.wikimedia.org/wikipedia/commons/c/c8/Pneumonia_X-ray.jpg",
         },
     ],
     "ct_scan": [
         {
             "id": "ct_chest",
-            "name": "Chest CT Axial Slice",
-            "label_hint": "CT Analysis",
+            "name": "Normal Chest CT",
+            "label_hint": "Known label: Normal",
+            "expected_label": "Normal",
             "url": "https://upload.wikimedia.org/wikipedia/commons/4/4e/CT_of_a_normal_Thorax%2C_axial_plane_%2830%29.jpg",
         },
         {
             "id": "ct_lung",
-            "name": "Lung CT Cross-section",
-            "label_hint": "High-res CT",
+            "name": "Thorax CT Slice",
+            "label_hint": "Known label: Normal",
+            "expected_label": "Normal",
             "url": "https://upload.wikimedia.org/wikipedia/commons/6/6e/CT_scan_of_the_Thorax_%28axial%29_%281%29.jpg",
         },
     ],

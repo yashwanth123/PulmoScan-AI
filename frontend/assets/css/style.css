@@ -380,6 +380,41 @@ body {
 }
 
 .disclaimer { padding: 1rem 1.25rem; border-radius: 14px; font-size: 0.8rem; color: var(--text-muted); }
+
+.info-banner {
+  padding: 0.85rem 1.25rem; border-radius: 14px; margin-bottom: 1.25rem;
+  font-size: 0.85rem; color: var(--text-muted);
+  background: rgba(100, 116, 139, 0.1); border: 1px solid rgba(100, 116, 139, 0.2);
+}
+
+.reliability-badge {
+  margin-top: 0.65rem; padding: 0.5rem 0.85rem; border-radius: 10px;
+  font-size: 0.78rem; line-height: 1.4;
+}
+.reliability-demo { background: rgba(251,191,36,0.1); color: var(--gold); border: 1px solid rgba(251,191,36,0.25); }
+.reliability-low { background: rgba(248,113,113,0.1); color: var(--red); border: 1px solid rgba(248,113,113,0.25); }
+.reliability-medium { background: rgba(251,191,36,0.1); color: var(--gold); border: 1px solid rgba(251,191,36,0.2); }
+.reliability-high { background: rgba(52,211,153,0.1); color: var(--green); border: 1px solid rgba(52,211,153,0.25); }
+
+.validation-card {
+  padding: 1rem 1.25rem; border-radius: 14px; margin-bottom: 1.25rem;
+  border: 1px solid var(--glass-border);
+}
+.validation-card h4 { font-size: 0.9rem; margin-bottom: 0.75rem; }
+.validation-row { display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 0.35rem; color: var(--text-muted); }
+.validation-row strong { color: var(--text); }
+.validation-result { margin-top: 0.75rem; padding: 0.75rem; border-radius: 10px; font-size: 0.85rem; font-weight: 600; }
+.validation-result.match { background: rgba(52,211,153,0.12); color: var(--green); border: 1px solid rgba(52,211,153,0.3); }
+.validation-result.mismatch { background: rgba(248,113,113,0.12); color: var(--red); border: 1px solid rgba(248,113,113,0.3); }
+
+.model-accuracy-card { margin-bottom: 1.5rem; }
+.accuracy-status { padding: 0.85rem 1rem; border-radius: 12px; margin-bottom: 1rem; font-size: 0.9rem; }
+.accuracy-status.trained { background: rgba(52,211,153,0.1); color: var(--green); border: 1px solid rgba(52,211,153,0.25); }
+.accuracy-status.untrained { background: rgba(251,191,36,0.1); color: var(--gold); border: 1px solid rgba(251,191,36,0.25); }
+.accuracy-stats { display: flex; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 1rem; font-size: 0.9rem; }
+.accuracy-stats strong { color: var(--cyan); font-family: var(--font-display); }
+.verify-steps { margin-top: 1rem; padding-left: 1.25rem; color: var(--text-muted); font-size: 0.85rem; line-height: 1.8; }
+
 .hidden { display: none !important; }
 
 /* ── Dashboard ── */

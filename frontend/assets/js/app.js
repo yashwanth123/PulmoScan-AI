@@ -8,6 +8,7 @@
   let selectedScanType = 'chest_xray';
   let selectedFile = null;
   let sampleCache = {};
+  let expectedLabel = null;  // known label when using a sample image
 
   const CLASS_COLORS = {
     'COVID-19': '#f87171',
@@ -37,6 +38,7 @@
     loadSamples();
     checkModelStatus();
     refreshDashboard();
+    loadModelMetrics();
     injectRingGradient();
   });
 
@@ -102,7 +104,7 @@
         $$('.section').forEach((s) => s.classList.remove('active'));
         $(`#section-${section}`)?.classList.add('active');
         $('#page-title').textContent = btn.textContent.trim();
-        if (section === 'dashboard') refreshDashboard();
+        if (section === 'dashboard') { refreshDashboard(); loadModelMetrics(); }
         if (section === 'history') refreshHistory();
         $('#sidebar')?.classList.remove('open');
       });
@@ -121,7 +123,10 @@
     });
 
     fileInput?.addEventListener('change', () => {
-      if (fileInput.files?.[0]) handleFile(fileInput.files[0]);
+      if (fileInput.files?.[0]) {
+        expectedLabel = null;
+        handleFile(fileInput.files[0]);
+      }
     });
 
     ['dragenter', 'dragover'].forEach((evt) => {
@@ -158,6 +163,7 @@
 
   function clearUpload() {
     selectedFile = null;
+    expectedLabel = null;
     const fi = $('#file-input');
     if (fi) fi.value = '';
     const img = $('#preview-image');
@@ -221,6 +227,9 @@
       selectedScanType = scanType;
       selectModalityCard(scanType);
 
+      const sample = (sampleCache[scanType] || []).find((s) => s.id === sampleId);
+      expectedLabel = sample?.expected_label || null;
+
       const res = await fetch(`${API}/api/samples/${scanType}/${sampleId}`);
       if (!res.ok) throw new Error('Sample fetch failed');
       const blob = await res.blob();
@@ -263,6 +272,11 @@
           updatePreviewTag();
         });
       });
+
+      // Show MRI notice when MRI card exists
+      const mriCard = row.querySelector('.modality-card.disabled[data-key="mri"]');
+      const mriNotice = $('#mri-notice');
+      if (mriNotice && mriCard) mriNotice.classList.remove('hidden');
 
       const modList = $('#modalities-list');
       if (modList) {
@@ -360,6 +374,15 @@
     const demoBanner = $('#demo-banner');
     if (demoBanner) demoBanner.classList.toggle('hidden', !data.demo_mode);
 
+    const relBadge = $('#reliability-badge');
+    if (relBadge && data.reliability) {
+      relBadge.classList.remove('hidden');
+      relBadge.className = `reliability-badge reliability-${data.reliability}`;
+      relBadge.textContent = data.reliability_message || data.reliability;
+    }
+
+    showValidation(data.diagnosis, expectedLabel);
+
     const probsEl = $('#probabilities');
     if (probsEl) {
       probsEl.innerHTML = Object.entries(data.probabilities)
@@ -388,6 +411,67 @@
       gradcamSection?.classList.remove('hidden');
     } else {
       gradcamSection?.classList.add('hidden');
+    }
+  }
+
+  function showValidation(predicted, expected) {
+    const card = $('#validation-card');
+    if (!card) return;
+
+    if (!expected) {
+      card.classList.add('hidden');
+      return;
+    }
+
+    card.classList.remove('hidden');
+    $('#validation-expected').textContent = expected;
+    $('#validation-predicted').textContent = predicted;
+
+    const result = $('#validation-result');
+    const match = predicted.toLowerCase() === expected.toLowerCase()
+      || (predicted === 'Normal' && expected === 'Normal');
+
+    if (result) {
+      if (match) {
+        result.className = 'validation-result match';
+        result.textContent = '✅ CORRECT — AI matched the known label for this sample.';
+      } else {
+        result.className = 'validation-result mismatch';
+        result.textContent = `❌ WRONG — Expected "${expected}" but got "${predicted}". Train the model or try again.`;
+      }
+    }
+  }
+
+  async function loadModelMetrics() {
+    const panel = $('#model-accuracy-panel');
+    const steps = $('#verify-steps');
+    if (!panel) return;
+
+    try {
+      const res = await fetch(`${API}/api/model/metrics`);
+      const data = await res.json();
+
+      let html = '';
+      if (data.model_trained) {
+        html += `<div class="accuracy-status trained">✅ Model is <strong>trained</strong></div>`;
+        if (data.test_accuracy != null) {
+          html += `<div class="accuracy-stats">
+            <span>Test Accuracy: <strong>${data.test_accuracy}%</strong></span>
+            <span>AUC: <strong>${data.test_auc ?? '—'}%</strong></span>
+            <span>F1: <strong>${data.test_f1_macro ?? '—'}%</strong></span>
+          </div>`;
+        }
+      } else {
+        html += `<div class="accuracy-status untrained">⚠️ Model is <strong>NOT trained</strong> — predictions are demo-only and often wrong.</div>`;
+        html += `<p class="about-text">Run: <code>python ml_training/train.py --quick</code></p>`;
+      }
+      panel.innerHTML = html;
+
+      if (steps && data.reliability_guide) {
+        steps.innerHTML = data.reliability_guide.map((s) => `<li>${s}</li>`).join('');
+      }
+    } catch (err) {
+      panel.innerHTML = '<p class="about-text">Could not load model metrics.</p>';
     }
   }
 

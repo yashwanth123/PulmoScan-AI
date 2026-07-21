@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PulmoScan AI — Lung Imaging Intelligence Platform</title>
+  <meta name="description" content="AI-powered analysis of chest X-rays, CT scans, and lung imaging. COVID-19, Pneumonia, Tuberculosis detection with explainable AI." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/assets/css/style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🫁</text></svg>" />
+</head>
+<body>
+  <div class="app-shell">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-icon">
+          <svg viewBox="0 0 40 40" fill="none"><path d="M20 4C14 4 10 10 10 16c0 4 2 7 4 9v11h12V25c2-2 4-5 4-9 0-6-4-12-10-12z" stroke="currentColor" stroke-width="2" fill="none"/><path d="M16 20c0-2 1.5-4 4-4s4 2 4 4" stroke="currentColor" stroke-width="1.5"/></svg>
+        </div>
+        <div>
+          <h1>PulmoScan<span>AI</span></h1>
+          <p>Lung Imaging Platform</p>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <button class="nav-item active" data-section="analyze">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Analyze Scan
+        </button>
+        <button class="nav-item" data-section="dashboard">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          Dashboard
+        </button>
+        <button class="nav-item" data-section="history">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          History
+        </button>
+        <button class="nav-item" data-section="about">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          About
+        </button>
+      </nav>
+
+      <div class="sidebar-status" id="model-status">
+        <div class="status-dot loading"></div>
+        <span>Checking model...</span>
+      </div>
+    </aside>
+
+    <!-- Main content -->
+    <main class="main-content">
+      <header class="top-bar">
+        <button class="menu-toggle" id="menu-toggle" aria-label="Toggle menu">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <div class="top-bar-title" id="page-title">Analyze Scan</div>
+        <div class="top-bar-actions">
+          <span class="badge badge-live">● Live</span>
+        </div>
+      </header>
+
+      <!-- ANALYZE SECTION -->
+      <section class="section active" id="section-analyze">
+        <div class="hero-banner">
+          <div class="hero-text">
+            <h2>Intelligent Lung Scan Analysis</h2>
+            <p>Upload chest X-rays, CT slices, or related imaging. Our EfficientNet-based AI delivers multi-class detection with Grad-CAM explainability.</p>
+          </div>
+          <div class="hero-stats" id="hero-stats">
+            <div class="hero-stat"><span class="stat-num" id="stat-accuracy">—</span><span class="stat-label">Model Status</span></div>
+            <div class="hero-stat"><span class="stat-num">4</span><span class="stat-label">Conditions</span></div>
+            <div class="hero-stat"><span class="stat-num">224²</span><span class="stat-label">Resolution</span></div>
+          </div>
+        </div>
+
+        <!-- Scan type selector -->
+        <div class="scan-types-grid" id="scan-types"></div>
+
+        <!-- Upload + Results grid -->
+        <div class="analyze-grid">
+          <div class="card upload-card">
+            <div class="card-header">
+              <h3>Upload Imaging</h3>
+              <span class="card-sub">JPG, PNG, TIFF, BMP · Max 20 MB</span>
+            </div>
+            <div class="dropzone" id="dropzone">
+              <input type="file" id="file-input" accept="image/*" hidden />
+              <div class="dropzone-content" id="dropzone-content">
+                <div class="dropzone-icon">
+                  <svg viewBox="0 0 64 64" fill="none"><rect x="8" y="12" width="48" height="40" rx="4" stroke="currentColor" stroke-width="2"/><circle cx="32" cy="28" r="10" stroke="currentColor" stroke-width="2"/><path d="M8 44l12-12 8 8 12-16 16 20" stroke="currentColor" stroke-width="2"/></svg>
+                </div>
+                <p class="dropzone-title">Drag & drop your scan here</p>
+                <p class="dropzone-sub">or click to browse files</p>
+              </div>
+              <div class="preview-container hidden" id="preview-container">
+                <img id="preview-image" alt="Uploaded scan preview" />
+                <button class="btn-clear" id="clear-upload" title="Remove">✕</button>
+              </div>
+            </div>
+            <div class="upload-actions">
+              <label class="toggle-label">
+                <input type="checkbox" id="gradcam-toggle" checked />
+                <span class="toggle-switch"></span>
+                Grad-CAM heatmap
+              </label>
+              <button class="btn btn-primary" id="analyze-btn" disabled>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                Run Analysis
+              </button>
+            </div>
+          </div>
+
+          <div class="card results-card" id="results-card">
+            <div class="card-header">
+              <h3>Analysis Results</h3>
+              <span class="card-sub" id="results-timestamp"></span>
+            </div>
+            <div class="results-empty" id="results-empty">
+              <div class="empty-icon">🔬</div>
+              <p>Upload a scan and click <strong>Run Analysis</strong> to see AI-powered results with confidence scores and explainability heatmaps.</p>
+            </div>
+            <div class="results-content hidden" id="results-content">
+              <div class="diagnosis-banner" id="diagnosis-banner">
+                <div class="diagnosis-icon" id="diagnosis-icon"></div>
+                <div>
+                  <div class="diagnosis-label">Primary Finding</div>
+                  <div class="diagnosis-value" id="diagnosis-value"></div>
+                  <div class="confidence-bar-wrap">
+                    <div class="confidence-bar" id="confidence-bar"></div>
+                  </div>
+                  <div class="confidence-text" id="confidence-text"></div>
+                </div>
+                <div class="risk-badge" id="risk-badge"></div>
+              </div>
+
+              <div class="probabilities" id="probabilities"></div>
+
+              <div class="recommendation-box" id="recommendation-box">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                <p id="recommendation-text"></p>
+              </div>
+
+              <div class="gradcam-section hidden" id="gradcam-section">
+                <h4>Grad-CAM Explainability</h4>
+                <p class="gradcam-desc">Highlighted regions indicate areas that most influenced the AI decision.</p>
+                <img id="gradcam-image" alt="Grad-CAM heatmap overlay" />
+              </div>
+            </div>
+            <div class="loading-overlay hidden" id="loading-overlay">
+              <div class="spinner"></div>
+              <p>Analyzing scan with EfficientNet...</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="disclaimer">
+          ⚠️ <strong>Research & screening tool only.</strong> Not FDA/CE approved. Always consult qualified medical professionals for diagnosis and treatment decisions.
+        </div>
+      </section>
+
+      <!-- DASHBOARD SECTION -->
+      <section class="section" id="section-dashboard">
+        <div class="dashboard-grid" id="dashboard-grid">
+          <div class="metric-card">
+            <div class="metric-icon blue">📊</div>
+            <div class="metric-value" id="dash-total">0</div>
+            <div class="metric-label">Total Scans Analyzed</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-icon green">✅</div>
+            <div class="metric-value" id="dash-normal">0</div>
+            <div class="metric-label">Normal Results</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-icon red">🦠</div>
+            <div class="metric-value" id="dash-covid">0</div>
+            <div class="metric-label">COVID-19 Flags</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-icon orange">🫁</div>
+            <div class="metric-value" id="dash-pneumonia">0</div>
+            <div class="metric-label">Pneumonia Flags</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><h3>Detection Breakdown</h3></div>
+          <div class="breakdown-chart" id="breakdown-chart"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><h3>Supported Imaging Modalities</h3></div>
+          <div class="modalities-list" id="modalities-list"></div>
+        </div>
+      </section>
+
+      <!-- HISTORY SECTION -->
+      <section class="section" id="section-history">
+        <div class="card">
+          <div class="card-header"><h3>Recent Analyses</h3></div>
+          <div class="history-list" id="history-list">
+            <p class="empty-state">No analyses yet. Upload a scan to get started.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ABOUT SECTION -->
+      <section class="section" id="section-about">
+        <div class="about-grid">
+          <div class="card">
+            <div class="card-header"><h3>Platform Overview</h3></div>
+            <p class="about-text">PulmoScan AI is an enterprise-grade lung imaging intelligence platform built on transfer learning with <strong>EfficientNetB0</strong>. It classifies chest imaging into four categories: COVID-19, Normal, Pneumonia, and Tuberculosis.</p>
+            <ul class="feature-list">
+              <li>🔬 EfficientNetB0 transfer learning (ImageNet → medical fine-tune)</li>
+              <li>🎯 Multi-class detection with confidence scoring</li>
+              <li>🔥 Grad-CAM explainability heatmaps</li>
+              <li>📱 Responsive clinical-grade UI</li>
+              <li>🐳 Docker-ready deployment</li>
+              <li>📈 Real-time dashboard & history tracking</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="card-header"><h3>Tech Stack</h3></div>
+            <div class="tech-grid">
+              <div class="tech-item"><span>Python 3.11</span></div>
+              <div class="tech-item"><span>TensorFlow / Keras</span></div>
+              <div class="tech-item"><span>EfficientNetB0</span></div>
+              <div class="tech-item"><span>FastAPI</span></div>
+              <div class="tech-item"><span>OpenCV</span></div>
+              <div class="tech-item"><span>Grad-CAM</span></div>
+              <div class="tech-item"><span>Docker</span></div>
+              <div class="tech-item"><span>Vanilla JS UI</span></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><h3>Getting Started</h3></div>
+            <pre class="code-block"><code># Install
+pip install -r requirements.txt
+pip install -r requirements-dev.txt
+
+# Run tests
+make test-fast        # quick unit + API tests
+make test             # full suite incl. inference
+
+# Train model
+python ml_training/train.py --quick
+
+# Start platform
+python3 run.py
+
+# CLI prediction
+python3 scripts/predict.py scan.png</code></pre>
+          </div>
+          <div class="card">
+            <div class="card-header"><h3>Original Research</h3></div>
+            <p class="about-text">Evolving from a GITAM University B.Tech project on COVID-19 detection using deep learning, PulmoScan AI expands the scope to a full lung imaging platform with modern architecture, explainable AI, and production deployment.</p>
+            <p class="about-text"><strong>Authors:</strong> L. Naga Sai Sri Ravi Teja, S. Ritesh Dev, K. Bharath, T. Yashwanth Sai<br/><strong>Guide:</strong> Dr. Don S. Kumar, GITAM University</p>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="/assets/js/app.js"></script>
+</body>
+</html>

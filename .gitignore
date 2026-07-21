@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+.venv/
+env/
+.env
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# ML artifacts
+models/*.h5
+models/*.keras
+models/*.weights.h5
+!models/.gitkeep
+data/
+datasets/
+uploads/
+*.h5
+*.keras
+checkpoints/
+logs/
+tensorboard/
+
+# IDE & OS
+.idea/
+.vscode/
+.DS_Store
+*.swp
+Thumbs.db
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Docker
+*.log

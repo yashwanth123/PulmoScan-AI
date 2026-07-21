@@ -1,126 +1,233 @@
-# COVID-19 Detection Using Lung X-rays
+# PulmoScan AI — Lung Imaging Intelligence Platform
 
-This project explores the use of deep learning and transfer learning to classify chest X-ray images into **COVID-19**, **Pneumonia**, and **Normal** categories. It was developed as part of a final year B.Tech project at GITAM University.
+<p align="center">
+  <strong>AI-powered chest X-ray & lung scan analysis with explainable deep learning</strong>
+</p>
 
----
-
-## 🧠 Objective
-
-To build an AI-based system for early and cost-effective detection of COVID-19 infections using lung X-ray images, especially in areas lacking access to RT-PCR or CT scan facilities.
-
----
-
-## 📊 Dataset
-
-We used publicly available datasets from:
-- [Kaggle - Chest X-ray Pneumonia Dataset](https://www.kaggle.com/paultimothymooney/chest-xray-pneumonia)
-- [GitHub - education454 COVID-19 Dataset](https://github.com/education454/datasets)
-- [Qatar University - COVID-19 X-ray Images](#)
-
-**Total images:** 6568  
-- COVID-19: 712  
-- Pneumonia: 4273  
-- Normal: 1583  
+<p align="center">
+  EfficientNetB0 · Multi-class detection · Grad-CAM · Clinical-grade UI · Docker-ready
+</p>
 
 ---
 
-## 🏗️ Project Architecture
+## Overview
 
-The project has two phases:
-1. **Image Preprocessing:** resizing, grayscale conversion, rescaling, augmentation (optional)
-2. **Model Training & Evaluation:** using both custom CNN and pretrained models
+**PulmoScan AI** is a production-style medical imaging platform evolved from a GITAM University B.Tech research project. It analyzes chest X-rays and related lung scans to detect **COVID-19**, **Pneumonia**, **Normal**, and **Tuberculosis** using transfer learning.
 
-### Classification Scenarios:
-- **Binary:** COVID-19 vs Normal
-- **Categorical:** COVID-19 vs Pneumonia vs Normal
+> ⚠️ **Disclaimer:** Research and screening tool only. Not FDA/CE approved. Always consult qualified medical professionals.
 
 ---
 
-## 🔍 Models Used
+## Project Structure
 
-### Custom CNNs:
-- 5 CNNs with varying convolutional layers and filter sizes
-
-### Transfer Learning Models:
-- VGG16
-- DenseNet121 & DenseNet201
-- ResNet50
-- InceptionV3
-- InceptionResNetV2
-
-All models were evaluated using:
-- Accuracy
-- Precision
-- Recall
-- F1-Score
-- AUC (ROC)
-
----
-
-## 🧪 Key Results
-
-### Binary Classification (Best):
-| Model | Accuracy | F1-Score | AUC |
-|-------|----------|----------|-----|
-| **InceptionResNetV2** | 99.59% | 0.996 | 99.2 |
-
-### Categorical Classification (Best):
-| Model | Accuracy | F1-Score | AUC |
-|-------|----------|----------|-----|
-| **DenseNet121** | 79.0% | 0.82 | 92.0 |
-
-### Larger Dataset (Handcrafted):
-| Model | Accuracy (Test) | F1-Score | AUC |
-|-------|------------------|----------|-----|
-| **DenseNet201** | 83.6% | 0.81 | 95.6 |
+```
+pulmoscan-ai/
+├── backend/app/              # FastAPI application
+│   ├── main.py               # Server entry point
+│   ├── config.py             # Configuration
+│   ├── api/routes/           # REST endpoints
+│   └── ml/                   # Model, inference, Grad-CAM
+├── frontend/                 # Web UI (HTML/CSS/JS)
+├── ml_training/              # Training & evaluation modules
+│   ├── dataset.py            # Data download & generators
+│   ├── train.py              # Training CLI
+│   ├── evaluate.py           # Metrics & reports
+│   └── evaluate_cli.py       # Evaluation CLI
+├── scripts/
+│   ├── download_data.py      # Fetch dataset
+│   ├── predict.py            # CLI inference
+│   └── test.sh               # Run test suite
+├── tests/                    # Pytest test suite
+├── models/                   # Saved model weights
+├── run.py                    # Start web platform
+├── Makefile                  # Common commands
+├── requirements.txt
+└── requirements-dev.txt
+```
 
 ---
 
-## 🧑‍💻 Tech Stack
+## Quick Start
 
-- **Language:** Python  
-- **Libraries:** TensorFlow, Keras, OpenCV, Sklearn, NumPy, Matplotlib  
-- **Web Framework:** Flask (for frontend and prediction interface)  
-- **Frontend:** Responsive UI for mobile and tablet (with COVID stats, helper info, X-ray upload)
+### 1. Install
 
----
+```bash
+pip install -r requirements.txt
+pip install -r requirements-dev.txt   # optional, for tests
+```
 
-## 🧩 Features
+### 2. Train (recommended for accurate predictions)
 
-- Responsive web UI to upload and predict from X-ray
-- Backend with Flask API for inference
-- Transfer learning with ImageNet weights
-- Model evaluation using metrics and confusion matrices
+```bash
+# Download dataset (~1.3 GB) and train
+python scripts/download_data.py
+python ml_training/train.py
 
----
+# Quick smoke training (subset, 2 epochs)
+python ml_training/train.py --quick --epochs 2 --no-fine-tune
+```
 
-## 🔬 Limitations
+### 3. Run the platform
 
-- Overfitting observed due to small dataset
-- Bias in multiclass due to pneumonia-heavy data
-- Need for more COVID-positive X-ray data
+```bash
+python3 run.py
+```
 
----
+Open **http://localhost:8000**
 
-## 🚀 Future Work
+### Docker
 
-- Improve classification with Ensemble Learning
-- Fine-tune weights and freeze layers better
-- Use high-resolution consistent PA X-ray images only
-- Implement model explainability (e.g., Grad-CAM)
-- Deploy as a web service or mobile app
-
----
-
-## 👨‍🎓 Authors
-
-- L. Naga Sai Sri Ravi Teja  
-- S. Ritesh Dev  
-- K. Bharath  
-- **T. Yashwanth Sai**
-
-Under the guidance of **Dr. Don S. Kumar**  
-Dept. of Computer Science, GITAM University
+```bash
+docker compose up --build
+```
 
 ---
 
+## How to Test
+
+### Run all tests
+
+```bash
+# Using Make (recommended)
+make install-dev
+make test
+
+# Or directly
+pip install -r requirements-dev.txt
+python3 -m pytest tests/ -v
+```
+
+### Fast tests (skip TensorFlow inference)
+
+```bash
+make test-fast
+# equivalent to:
+python3 -m pytest tests/ -v -m "not slow"
+```
+
+### API tests only
+
+```bash
+make test-api
+```
+
+### Manual API smoke test
+
+Start the server in one terminal:
+
+```bash
+python3 run.py
+```
+
+In another terminal:
+
+```bash
+# Health check
+curl http://localhost:8000/api/health
+
+# Model info
+curl http://localhost:8000/api/model
+
+# Predict on an image
+curl -X POST http://localhost:8000/api/predict \
+  -F "file=@/path/to/chest_xray.png" \
+  -F "scan_type=chest_xray" \
+  -F "include_gradcam=true"
+```
+
+### CLI inference test
+
+```bash
+python3 scripts/predict.py /path/to/chest_xray.png --scan-type chest_xray
+```
+
+### Evaluate a trained model
+
+```bash
+python3 ml_training/evaluate_cli.py --model models/pulmoscan_efficientnet.keras
+```
+
+### Expected test output
+
+```
+tests/test_preprocessing.py ....          PASSED
+tests/test_dataset.py ....                PASSED
+tests/test_predictor.py ....              PASSED
+tests/test_api.py ........                PASSED
+```
+
+Slow tests (`@pytest.mark.slow`) load TensorFlow and run real inference — include them before release:
+
+```bash
+python3 -m pytest tests/ -v -m slow
+```
+
+---
+
+## API Reference
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/health` | Service health check |
+| `GET` | `/api/model` | Model info & status |
+| `GET` | `/api/scan-types` | Supported imaging modalities |
+| `POST` | `/api/predict` | Upload scan → diagnosis + Grad-CAM |
+| `GET` | `/api/stats` | Dashboard statistics |
+| `GET` | `/api/history` | Recent predictions |
+
+---
+
+## Makefile Commands
+
+| Command | Description |
+|---------|-------------|
+| `make install` | Install runtime dependencies |
+| `make install-dev` | Install runtime + test dependencies |
+| `make run` | Start web platform |
+| `make train` | Quick training smoke run |
+| `make test` | Full pytest suite |
+| `make test-fast` | Skip slow TensorFlow tests |
+| `make test-api` | API integration tests only |
+| `make clean` | Remove Python cache files |
+
+---
+
+## Model Performance
+
+From original research (extended dataset, 6568 images):
+
+| Task | Best Model | Accuracy | F1 | AUC |
+|------|-----------|----------|-----|-----|
+| Binary (COVID vs Normal) | InceptionResNetV2 | 99.59% | 0.996 | 99.2% |
+| 3-class | DenseNet121 | 79.0% | 0.82 | 92.0% |
+| Extended | DenseNet201 | 83.6% | 0.81 | 95.6% |
+
+PulmoScan AI uses **EfficientNetB0** for the best speed/accuracy tradeoff.
+
+---
+
+## Tech Stack
+
+- **Backend:** Python 3.11, FastAPI, TensorFlow/Keras, OpenCV
+- **Model:** EfficientNetB0 + custom classification head
+- **Testing:** pytest, httpx, FastAPI TestClient
+- **Frontend:** Vanilla JS, responsive CSS
+- **Deploy:** Docker, Uvicorn
+
+---
+
+## Original Research
+
+Developed as a B.Tech final year project at **GITAM University** under **Dr. Don S. Kumar**.
+
+**Authors:** L. Naga Sai Sri Ravi Teja · S. Ritesh Dev · K. Bharath · T. Yashwanth Sai
+
+**Datasets:**
+- [Kaggle Chest X-ray Pneumonia](https://www.kaggle.com/paultimothymooney/chest-xray-pneumonia)
+- [education454 COVID-19 Dataset](https://github.com/education454/datasets)
+
+---
+
+## License
+
+MIT License — for research and educational use only. Not for clinical diagnosis.

@@ -11,7 +11,7 @@ from typing import Any
 import numpy as np
 import tensorflow as tf
 
-from backend.app.config import CLASS_NAMES, MODEL_PATH, SCAN_TYPES
+from backend.app.config import CLASS_NAMES, IMG_SIZE, MODEL_PATH, SCAN_TYPES
 from backend.app.ml.gradcam import generate_gradcam
 from backend.app.ml.model import build_model, compile_model
 from backend.app.ml.preprocessing import load_image_from_bytes, preprocess_for_model
@@ -116,18 +116,8 @@ def get_model_status() -> dict[str, Any]:
         "model_exists": MODEL_PATH.exists(),
         "classes": CLASS_NAMES,
         "architecture": "EfficientNetB0 + custom head",
-        "input_size": list(preprocess_for_model(load_image_from_bytes(
-            _placeholder_png_bytes()
-        )).shape[1:3]),
+        "input_size": list(IMG_SIZE),
     }
-
-
-def _placeholder_png_bytes() -> bytes:
-    """Minimal 1x1 PNG for shape probing."""
-    return (
-        b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01"
-        b"\x00\x00\x00\x01\x08\x02\x00\x00\x00\x90wS\xde\x00\x00\x00\x0cIDATx\x9cc\xf8\x0f\x00\x00\x01\x01\x00\x05\x18\xd8N\x00\x00\x00\x00IEND\xaeB`\x82"
-    )
 
 
 def predict(
@@ -174,6 +164,17 @@ def predict(
 
     _record_prediction(result, scan_type)
     return result
+
+
+def reset_runtime_state() -> None:
+    """Clear in-memory stats and history (used in tests)."""
+    global _prediction_history, _stats
+    _prediction_history = []
+    _stats = {
+        "total_scans": 0,
+        "by_class": {c: 0 for c in CLASS_NAMES},
+        "by_scan_type": {},
+    }
 
 
 def _record_prediction(result: PredictionResult, scan_type: str) -> None:

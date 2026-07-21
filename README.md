@@ -12,77 +12,68 @@
 
 ## Overview
 
-**PulmoScan AI** is a full-stack medical imaging platform evolved from a GITAM University B.Tech research project. It analyzes chest X-rays and related lung scans to detect **COVID-19**, **Pneumonia**, **Normal**, and **Tuberculosis** patterns using state-of-the-art transfer learning.
+**PulmoScan AI** is a production-style medical imaging platform evolved from a GITAM University B.Tech research project. It analyzes chest X-rays and related lung scans to detect **COVID-19**, **Pneumonia**, **Normal**, and **Tuberculosis** using transfer learning.
 
 > ⚠️ **Disclaimer:** Research and screening tool only. Not FDA/CE approved. Always consult qualified medical professionals.
 
 ---
 
-## Features
-
-| Feature | Description |
-|---------|-------------|
-| 🧠 **EfficientNetB0** | ImageNet-pretrained backbone, fine-tuned for lung imaging |
-| 🎯 **Multi-class detection** | COVID-19, Normal, Pneumonia, Tuberculosis |
-| 🔥 **Grad-CAM** | Visual explainability heatmaps on predictions |
-| 🩻 **Multi-modality UI** | Chest X-Ray, CT Scan (MRI coming soon) |
-| 📊 **Dashboard** | Real-time stats, detection breakdown, history |
-| 🐳 **Docker** | One-command deployment |
-| 📱 **Responsive UI** | Clinical dark-theme interface for desktop & mobile |
-
----
-
-## Architecture
+## Project Structure
 
 ```
 pulmoscan-ai/
-├── backend/app/          # FastAPI server
-│   ├── main.py           # Application entry
-│   ├── config.py         # Settings & class labels
-│   ├── api/routes/       # REST endpoints
-│   └── ml/               # Model, predictor, Grad-CAM
-├── frontend/             # Modern web UI
-│   ├── index.html
-│   └── assets/css,js/
-├── ml_training/          # Training pipeline
-│   └── train.py
-├── models/               # Saved model weights
-├── uploads/              # Uploaded scans (audit)
-├── data/                 # Dataset cache
-├── run.py                # Start server
-├── Dockerfile
-└── docker-compose.yml
+├── backend/app/              # FastAPI application
+│   ├── main.py               # Server entry point
+│   ├── config.py             # Configuration
+│   ├── api/routes/           # REST endpoints
+│   └── ml/                   # Model, inference, Grad-CAM
+├── frontend/                 # Web UI (HTML/CSS/JS)
+├── ml_training/              # Training & evaluation modules
+│   ├── dataset.py            # Data download & generators
+│   ├── train.py              # Training CLI
+│   ├── evaluate.py           # Metrics & reports
+│   └── evaluate_cli.py       # Evaluation CLI
+├── scripts/
+│   ├── download_data.py      # Fetch dataset
+│   ├── predict.py            # CLI inference
+│   └── test.sh               # Run test suite
+├── tests/                    # Pytest test suite
+├── models/                   # Saved model weights
+├── run.py                    # Start web platform
+├── Makefile                  # Common commands
+├── requirements.txt
+└── requirements-dev.txt
 ```
 
 ---
 
 ## Quick Start
 
-### 1. Install dependencies
+### 1. Install
 
 ```bash
 pip install -r requirements.txt
+pip install -r requirements-dev.txt   # optional, for tests
 ```
 
-### 2. Train the model (recommended)
-
-Downloads the COVID-19 X-ray dataset (~1.3 GB) and fine-tunes EfficientNetB0:
+### 2. Train (recommended for accurate predictions)
 
 ```bash
-# Full training (~30 min on GPU)
+# Download dataset (~1.3 GB) and train
+python scripts/download_data.py
 python ml_training/train.py
 
-# Quick demo training (~5 min)
-python ml_training/train.py --quick --epochs 5
+# Quick smoke training (subset, 2 epochs)
+python ml_training/train.py --quick --epochs 2 --no-fine-tune
 ```
 
-### 3. Launch the platform
+### 3. Run the platform
 
 ```bash
-python run.py
+python3 run.py
 ```
 
-Open **http://localhost:8000** in your browser.
+Open **http://localhost:8000**
 
 ### Docker
 
@@ -92,7 +83,88 @@ docker compose up --build
 
 ---
 
-## API Endpoints
+## How to Test
+
+### Run all tests
+
+```bash
+# Using Make (recommended)
+make install-dev
+make test
+
+# Or directly
+pip install -r requirements-dev.txt
+python3 -m pytest tests/ -v
+```
+
+### Fast tests (skip TensorFlow inference)
+
+```bash
+make test-fast
+# equivalent to:
+python3 -m pytest tests/ -v -m "not slow"
+```
+
+### API tests only
+
+```bash
+make test-api
+```
+
+### Manual API smoke test
+
+Start the server in one terminal:
+
+```bash
+python3 run.py
+```
+
+In another terminal:
+
+```bash
+# Health check
+curl http://localhost:8000/api/health
+
+# Model info
+curl http://localhost:8000/api/model
+
+# Predict on an image
+curl -X POST http://localhost:8000/api/predict \
+  -F "file=@/path/to/chest_xray.png" \
+  -F "scan_type=chest_xray" \
+  -F "include_gradcam=true"
+```
+
+### CLI inference test
+
+```bash
+python3 scripts/predict.py /path/to/chest_xray.png --scan-type chest_xray
+```
+
+### Evaluate a trained model
+
+```bash
+python3 ml_training/evaluate_cli.py --model models/pulmoscan_efficientnet.keras
+```
+
+### Expected test output
+
+```
+tests/test_preprocessing.py ....          PASSED
+tests/test_dataset.py ....                PASSED
+tests/test_predictor.py ....              PASSED
+tests/test_api.py ........                PASSED
+```
+
+Slow tests (`@pytest.mark.slow`) load TensorFlow and run real inference — include them before release:
+
+```bash
+python3 -m pytest tests/ -v -m slow
+```
+
+---
+
+## API Reference
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
@@ -103,14 +175,20 @@ docker compose up --build
 | `GET` | `/api/stats` | Dashboard statistics |
 | `GET` | `/api/history` | Recent predictions |
 
-### Example: Predict
+---
 
-```bash
-curl -X POST http://localhost:8000/api/predict \
-  -F "file=@chest_xray.jpg" \
-  -F "scan_type=chest_xray" \
-  -F "include_gradcam=true"
-```
+## Makefile Commands
+
+| Command | Description |
+|---------|-------------|
+| `make install` | Install runtime dependencies |
+| `make install-dev` | Install runtime + test dependencies |
+| `make run` | Start web platform |
+| `make train` | Quick training smoke run |
+| `make test` | Full pytest suite |
+| `make test-fast` | Skip slow TensorFlow tests |
+| `make test-api` | API integration tests only |
+| `make clean` | Remove Python cache files |
 
 ---
 
@@ -124,28 +202,17 @@ From original research (extended dataset, 6568 images):
 | 3-class | DenseNet121 | 79.0% | 0.82 | 92.0% |
 | Extended | DenseNet201 | 83.6% | 0.81 | 95.6% |
 
-PulmoScan AI uses **EfficientNetB0** for the best speed/accuracy tradeoff. Retrain with `ml_training/train.py` for dataset-specific results.
+PulmoScan AI uses **EfficientNetB0** for the best speed/accuracy tradeoff.
 
 ---
 
 ## Tech Stack
 
-- **Backend:** Python, FastAPI, TensorFlow/Keras, OpenCV
+- **Backend:** Python 3.11, FastAPI, TensorFlow/Keras, OpenCV
 - **Model:** EfficientNetB0 + custom classification head
-- **Frontend:** Vanilla JS, modern CSS (no build step)
+- **Testing:** pytest, httpx, FastAPI TestClient
+- **Frontend:** Vanilla JS, responsive CSS
 - **Deploy:** Docker, Uvicorn
-
----
-
-## Roadmap
-
-- [ ] Expand to full 4-class dataset (Pneumonia + TB from Kaggle)
-- [ ] Ensemble models (EfficientNet + DenseNet + InceptionResNetV2)
-- [ ] DICOM file support
-- [ ] CT scan-specific model
-- [ ] Mobile app (React Native)
-- [ ] Cloud deployment (AWS/GCP)
-- [ ] FHIR integration for hospital systems
 
 ---
 

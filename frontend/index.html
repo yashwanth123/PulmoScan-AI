@@ -237,16 +237,22 @@
           </div>
           <div class="card">
             <div class="card-header"><h3>Getting Started</h3></div>
-            <pre class="code-block"><code># Install dependencies
+            <pre class="code-block"><code># Install
 pip install -r requirements.txt
+pip install -r requirements-dev.txt
 
-# Train model (downloads dataset ~1.3 GB)
+# Run tests
+make test-fast        # quick unit + API tests
+make test             # full suite incl. inference
+
+# Train model
 python ml_training/train.py --quick
 
 # Start platform
-python run.py
+python3 run.py
 
-# Open http://localhost:8000</code></pre>
+# CLI prediction
+python3 scripts/predict.py scan.png</code></pre>
           </div>
           <div class="card">
             <div class="card-header"><h3>Original Research</h3></div>

@@ -1,19 +1,22 @@
 #!/usr/bin/env python3
-"""Download COVID-19 X-ray dataset for training."""
-import subprocess
+"""Download the public COVID-19 chest X-ray dataset."""
+from __future__ import annotations
+
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-DATA_DIR = ROOT / "data" / "datasets"
-REPO = "https://github.com/education454/datasets.git"
+sys.path.insert(0, str(ROOT))
+
+from ml_training.dataset import download_dataset
+
+
+def main() -> None:
+    path = download_dataset()
+    print(f"Dataset ready at: {path}")
+    print(f"  Train: {path / 'train'}")
+    print(f"  Test:  {path / 'test'}")
+
 
 if __name__ == "__main__":
-    if (DATA_DIR / "Data").exists():
-        print(f"Dataset already exists at {DATA_DIR}")
-        sys.exit(0)
-
-    DATA_DIR.parent.mkdir(parents=True, exist_ok=True)
-    print(f"Cloning dataset to {DATA_DIR} (~1.3 GB)...")
-    subprocess.run(["git", "clone", "--depth", "1", REPO, str(DATA_DIR)], check=True)
-    print("Done.")
+    main()
